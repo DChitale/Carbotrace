@@ -1,0 +1,109 @@
+import os
+import shutil
+import uuid
+import logging
+from typing import Tuple, Optional
+from urllib.parse import urlparse
+import git
+from backend.app.config import settings
+
+logger = logging.getLogger(__name__)
+
+
+def parse_github_url(repo_url: str) -> Tuple[str, str]:
+    """Parse GitHub URL to extract owner and repository name.
+
+    Args:
+        repo_url: The GitHub repository URL (e.g., https://github.com/owner/repo)
+
+    Returns:
+        A tuple of (owner, repo_name)
+
+    Raises:
+        ValueError: If the URL is not a valid GitHub URL
+    """
+    try:
+        parsed = urlparse(repo_url)
+        if "github.com" not in parsed.netloc:
+            raise ValueError("Only GitHub repositories are supported.")
+        
+        path_parts = [p for p in parsed.path.split("/") if p]
+        if len(path_parts) < 2:
+            raise ValueError("Invalid GitHub repository URL.")
+            
+        owner = path_parts[0]
+        # Remove .git extension if present
+        repo_name = path_parts[1]
+        if repo_name.endswith(".git"):
+            repo_name = repo_name[:-4]
+            
+        return owner, repo_name
+    except Exception as e:
+        logger.error(f"Error parsing GitHub URL {repo_url}: {e}")
+        raise ValueError(f"Invalid GitHub URL: {e}")
+
+
+async def clone_repository(repo_url: str, branch: Optional[str] = None) -> str:
+    """Clone a public GitHub repository to a local temporary directory.
+
+    Args:
+        repo_url: GitHub repository URL to clone.
+        branch: Optional branch, tag, or commit ref to checkout.
+
+    Returns:
+        Absolute path to the cloned repository.
+
+    Raises:
+        ValueError: If repository URL is invalid.
+        RuntimeError: If cloning fails.
+    """
+    owner, repo_name = parse_github_url(repo_url)
+    
+    # Generate unique folder name
+    unique_id = uuid.uuid4().hex
+    target_dir = os.path.join(settings.TEMP_CLONE_DIR, f"{owner}_{repo_name}_{unique_id}")
+    
+    logger.info(f"Cloning {repo_url} (branch: {branch or 'default'}) to {target_dir}...")
+    try:
+        kwargs = {"depth": 1, "config": "core.longpaths=true", "allow_unsafe_options": True}
+        if branch:
+            kwargs["branch"] = branch
+        # Perform a shallow clone (depth=1) for efficiency
+        git.Repo.clone_from(repo_url, target_dir, **kwargs)
+        logger.info(f"Successfully cloned {repo_name} to {target_dir}")
+        return target_dir
+    except Exception as e:
+        logger.error(f"Failed to clone repository {repo_url}: {e}")
+        # Clean up in case directory was partially created
+        cleanup_cloned_repo(target_dir)
+        raise RuntimeError(f"Failed to clone repository: {e}")
+
+
+def cleanup_cloned_repo(local_path: str) -> None:
+    """Safely delete the cloned repository directory.
+
+    Args:
+        local_path: Path of the directory to delete.
+    """
+    if not local_path or not os.path.exists(local_path):
+        return
+        
+    # Ensure we only delete folders inside the temporary clone directory
+    abs_local_path = os.path.abspath(local_path)
+    abs_temp_dir = os.path.abspath(settings.TEMP_CLONE_DIR)
+    
+    if not abs_local_path.startswith(abs_temp_dir) or abs_local_path == abs_temp_dir:
+        logger.warning(f"Prevented deletion attempt outside temp clone dir: {local_path}")
+        return
+        
+    try:
+        # On Windows, git files might be read-only, so use an error handler to force deletion
+        def on_rm_error(func, path, exc_info):
+            import stat
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+            
+        shutil.rmtree(abs_local_path, onerror=on_rm_error)
+        logger.info(f"Successfully cleaned up temporary directory {abs_local_path}")
+    except Exception as e:
+        logger.error(f"Error cleaning up temporary directory {abs_local_path}: {e}")
