@@ -63,13 +63,38 @@ async def clone_repository(repo_url: str, branch: Optional[str] = None) -> str:
     unique_id = uuid.uuid4().hex
     target_dir = os.path.join(settings.TEMP_CLONE_DIR, f"{owner}_{repo_name}_{unique_id}")
     
-    logger.info(f"Cloning {repo_url} (branch: {branch or 'default'}) to {target_dir}...")
+    logger.info(f"Cloning {repo_url} (branch/ref: {branch or 'default'}) to {target_dir}...")
     try:
         kwargs = {"depth": 1, "config": "core.longpaths=true", "allow_unsafe_options": True}
+        
+        # Check if branch is a hex commit SHA
+        is_commit_sha = branch and len(branch) >= 7 and all(c in '0123456789abcdefABCDEF' for c in branch)
+
+        if branch and not is_commit_sha:
+            try:
+                kwargs["branch"] = branch
+                git.Repo.clone_from(repo_url, target_dir, **kwargs)
+                logger.info(f"Successfully cloned {repo_name} (branch: {branch}) to {target_dir}")
+                return target_dir
+            except Exception as branch_err:
+                logger.warning(f"Failed to clone directly with branch={branch}: {branch_err}. Falling back to default clone...")
+
+        # If branch is a commit SHA or branch clone failed, clone default branch and fetch ref
+        kwargs.pop("branch", None)
+        # Remove depth limit if we need to fetch a specific commit SHA
+        if is_commit_sha:
+            kwargs.pop("depth", None)
+
+        repo = git.Repo.clone_from(repo_url, target_dir, **kwargs)
+        
         if branch:
-            kwargs["branch"] = branch
-        # Perform a shallow clone (depth=1) for efficiency
-        git.Repo.clone_from(repo_url, target_dir, **kwargs)
+            try:
+                repo.git.fetch("origin", branch)
+                repo.git.checkout(branch)
+                logger.info(f"Successfully checked out ref {branch} in {target_dir}")
+            except Exception as checkout_err:
+                logger.warning(f"Fetch/checkout of ref {branch} failed: {checkout_err}. Using default branch HEAD.")
+
         logger.info(f"Successfully cloned {repo_name} to {target_dir}")
         return target_dir
     except Exception as e:
