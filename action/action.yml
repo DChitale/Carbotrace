@@ -84,17 +84,17 @@ runs:
 
         COMMENT_BODY="## 🌱 Carbotrace Carbon Audit Diff
 
-$WARNING_BANNER
+        $WARNING_BANNER
 
-| Layer | Base ($BASE_REF) | Head ($HEAD_REF) | Delta |
-|-------|------------------|------------------|-------|
-| **Total Carbon Score** | **$BASE_SCORE / 10.0** | **$HEAD_SCORE / 10.0** | **$INDICATOR_SCORE** |
-| **Code Layer** | $BASE_CODE g | $HEAD_CODE g | $INDICATOR_CODE |
-| **CI/CD Layer** | $BASE_CI g | $HEAD_CI g | $INDICATOR_CI |
-| **Infra Layer** | $BASE_INFRA g | $HEAD_INFRA g | $INDICATOR_INFRA |
+        | Layer | Base ($BASE_REF) | Head ($HEAD_REF) | Delta |
+        |-------|------------------|------------------|-------|
+        | **Total Carbon Score** | **$BASE_SCORE / 10.0** | **$HEAD_SCORE / 10.0** | **$INDICATOR_SCORE** |
+        | **Code Layer** | $BASE_CODE g | $HEAD_CODE g | $INDICATOR_CODE |
+        | **CI/CD Layer** | $BASE_CI g | $HEAD_CI g | $INDICATOR_CI |
+        | **Infra Layer** | $BASE_INFRA g | $HEAD_INFRA g | $INDICATOR_INFRA |
 
-### Recommendations
-"
+        ### Recommendations
+        "
 
         INDEX=1
         while read -r rec; do
@@ -105,8 +105,8 @@ $WARNING_BANNER
           PRIORITY=$(echo "$rec" | jq -r '.priority')
           
           COMMENT_BODY="$COMMENT_BODY
-$INDEX. **$ISSUE** (Est. Savings: **-$SAVINGS%**, Priority: **$PRIORITY**)
-   - $DESC"
+        $INDEX. **$ISSUE** (Est. Savings: **-$SAVINGS%**, Priority: **$PRIORITY**)
+           - $DESC"
           INDEX=$((INDEX+1))
         done <<< "$(echo "$HEAD_RESPONSE" | jq -c '.recommendations[]?')"
 
