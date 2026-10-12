@@ -6,6 +6,7 @@ import { GithubAuthModal } from './components/github/GithubAuthModal';
 import { HomePage } from './pages/HomePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { HistoryPage } from './pages/HistoryPage';
+import { MapPage } from './pages/MapPage';
 import { useGithubAuth } from './hooks/useGithubAuth';
 
 export function App() {
@@ -36,6 +37,7 @@ export function App() {
               element={<DashboardPage githubAuth={githubAuth} />}
             />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/map" element={<MapPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
