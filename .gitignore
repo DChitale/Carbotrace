@@ -216,6 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+package-lock.json
 
+node_modules
 
 Carbotrace-test/
