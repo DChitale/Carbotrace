@@ -76,41 +76,46 @@ docker run -d `
 ### Step 2: Start Backend (FastAPI)
 
 > ⚡ **Windows One-Click Shortcut:**
-> Double-click **`run_all.bat`** (or in PowerShell type `.\run_all.bat` / `.\run_all.ps1`) to automatically free ports 8001 & 5173, start TimescaleDB container, and boot both FastAPI and Vite services!
-> Or double-click **`run_backend.bat`** (PowerShell: `.\run_backend.bat`) for backend only.
+> Double-click **`run_backend.bat`** (or in PowerShell type `.\run_backend.bat` / `.\run_backend.ps1`) for backend only. It automatically detects your virtual environment, frees port `8001`, verifies Docker database status, and launches Uvicorn.
+> Or double-click **`run_all.bat`** (or in PowerShell type `.\run_all.bat` / `.\run_all.ps1`) to automatically free ports 8001 & 5173, start TimescaleDB container, and boot both FastAPI and Vite services together!
 
-Alternatively, start manually:
+Alternatively, start manually step-by-step:
 
-1. Open a terminal and navigate to the project root:
+1. Open a PowerShell terminal and navigate to the project root:
    ```bash
    cd d:\Projects\Carbotrace
    ```
 
-2. Create and activate a Python virtual environment:
+2. Activate the Python virtual environment:
    ```powershell
-   # Windows PowerShell:
-   python -m venv .venv
+   # If using backend\.venv:
+   .\backend\.venv\Scripts\activate
+
+   # Or if created at project root .venv:
    .\.venv\Scripts\activate
    ```
+   *(If creating fresh: `python -m venv backend\.venv` followed by `pip install -r requirements.txt`)*
 
-3. Install required Python packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Set the `PYTHONPATH` environment variable (required so Python can find modules):
+3. Set the `PYTHONPATH` environment variable:
+   > ⚠️ **Important:** Required so Python can resolve the `backend.app` module namespace cleanly.
    ```powershell
-   # PowerShell:
    $env:PYTHONPATH="d:\Projects\Carbotrace"
    ```
 
-5. Run the FastAPI development server:
-   ```bash
-   uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+4. Verify Port 8001 is free (Port 8000 is often reserved by Windows `svchost`):
+   ```powershell
+   Get-NetTCPConnection -LocalPort 8001 -State Listen -ErrorAction SilentlyContinue
    ```
 
-   - **Backend URL:** `http://localhost:8000`
-   - **Interactive API Docs (Swagger):** `http://localhost:8000/docs`
+5. Run the FastAPI development server:
+   > ⚠️ **Important:** Always include `--reload-dir backend/app` when using `--reload`. This prevents Uvicorn's file watcher from triggering unwanted server reloads when git repositories are cloned to `backend/temp_repos/` during analysis.
+   ```powershell
+   backend\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --reload --reload-dir backend/app --host 0.0.0.0 --port 8001
+   ```
+
+   - **Backend API URL:** `http://localhost:8001/api`
+   - **Interactive API Docs (Swagger):** `http://localhost:8001/docs`
+   - **Health Check:** `http://localhost:8001/api/health`
 
 ---
 
@@ -159,7 +164,7 @@ To enable AI recommendations locally:
 ## 🔍 Verifying Everything Works
 
 ### 1. Check Backend Health
-Open `http://localhost:8000/api/health` in your browser. You should see:
+Open `http://localhost:8001/api/health` in your browser. You should see:
 ```json
 {
   "status": "healthy",
@@ -237,12 +242,12 @@ You can test PR branch scoring directly against the FastAPI server by sending th
 
 ```bash
 # 1. Analyze Base Branch (main)
-curl -X POST "http://localhost:8000/api/analyze-repo" \
+curl -X POST "http://localhost:8001/api/analyze-repo" \
   -H "Content-Type: application/json" \
   -d '{"repo_url": "https://github.com/facebook/react", "branch": "main"}'
 
 # 2. Analyze PR Branch (feature-branch)
-curl -X POST "http://localhost:8000/api/analyze-repo" \
+curl -X POST "http://localhost:8001/api/analyze-repo" \
   -H "Content-Type: application/json" \
   -d '{"repo_url": "https://github.com/facebook/react", "branch": "v18.0.0"}'
 ```
@@ -291,10 +296,39 @@ A default `.env` file is provided in the project root. Key options:
 - **Fix:** Ensure the repository URL is **public**. Private repositories require setting `GITHUB_TOKEN` in `.env`.
 
 ### Issue 4: Frontend shows "Failed to connect to backend server"
-- **Fix:** Verify FastAPI is running on `http://localhost:8000`. If you changed the backend port, update `API_BASE_URL` in `frontend/src/App.jsx`.
+- **Fix:** Verify FastAPI backend is running on `http://localhost:8001`.
+  The frontend dev server uses Vite's proxy configured in `frontend/vite.config.js`:
+  ```javascript
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
+    },
+  }
+  ```
+  If you run the backend on a custom port, update the `target` URL in `frontend/vite.config.js`.
 
+### Issue 5: Port 8000 Conflict (`[Errno 10048] error while attempting to bind on address`)
+On Windows, port `8000` is frequently reserved or occupied by Windows system services (such as `svchost.exe` hosting BranchCache, WinRM, or IIS). This is why Carbotrace defaults to **port 8001**.
+- **Diagnose which process is using a port in PowerShell:**
+  ```powershell
+  # Check if port 8000 or 8001 is listening:
+  Get-NetTCPConnection -LocalPort 8000, 8001 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess, State
 
-```
-Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess, State 
-tasklist /svc /FI "PID eq 2164"
-```
+  # Identify the process name by PID:
+  Get-Process -Id <PID>
+  ```
+- **Fix:**
+  - Run on port `8001` using `run_backend.bat 8001` (recommended, matches frontend proxy).
+  - Or terminate a conflicting process: `Stop-Process -Id <PID> -Force`.
+
+### Issue 6: Backend Unexpectedly Reloads Mid-Scan During Repo Cloning
+When repository scanning starts, `git clone` writes temporary files into `backend/temp_repos/`. If Uvicorn watches the entire repository directory, it detects these file additions and restarts the server mid-scan, terminating the analysis!
+- **Fix:** Restrict the reload watcher exclusively to the application code directory:
+  ```powershell
+  uvicorn backend.app.main:app --reload --reload-dir backend/app --port 8001
+  ```
+  *(This is preconfigured inside `run_backend.bat`)*

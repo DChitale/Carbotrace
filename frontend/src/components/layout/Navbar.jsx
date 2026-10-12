@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Leaf, ClockCounterClockwise, GithubLogo } from '@phosphor-icons/react';
+import { Leaf, ClockCounterClockwise, GithubLogo, Globe } from '@phosphor-icons/react';
 
 export function Navbar({ onOpenGithubModal, githubAuth }) {
   const { isAuthenticated, user } = githubAuth;
@@ -77,6 +77,23 @@ export function Navbar({ onOpenGithubModal, githubAuth }) {
               })}
             >
               Analyze
+            </NavLink>
+            <NavLink
+              to="/map"
+              className={({ isActive }) =>
+                `btn btn-ghost btn-sm ${isActive ? 'active' : ''}`
+              }
+              style={({ isActive }) => ({
+                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                backgroundColor: isActive ? 'var(--bg-tertiary)' : 'transparent',
+                fontWeight: isActive ? 600 : 400,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+              })}
+            >
+              <Globe size={14} />
+              <span>Map</span>
             </NavLink>
             <NavLink
               to="/history"
