@@ -1,59 +1,84 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchUserRepos as apiFetchUserRepos } from '../services/api';
+import { api } from '../services/api';
+
+const STORAGE_KEY = 'carbotrace_github_pat';
 
 export function useGithubAuth() {
-  const [githubToken, setGithubToken] = useState(() => localStorage.getItem('carbotrace_github_token') || '');
-  const [githubUser, setGithubUser] = useState(() => {
-    const saved = localStorage.getItem('carbotrace_github_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [userRepos, setUserRepos] = useState([]);
-  const [isFetchingRepos, setIsFetchingRepos] = useState(false);
+  const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem(STORAGE_KEY)));
+  const [error, setError] = useState(null);
 
-  const fetchUserRepos = useCallback(async (token) => {
-    const authToken = token || githubToken;
-    if (!authToken) return;
-
-    setIsFetchingRepos(true);
-    try {
-      const data = await apiFetchUserRepos(authToken);
-      setUserRepos(data);
-    } catch (err) {
-      console.error('Failed to fetch user repositories:', err);
-    } finally {
-      setIsFetchingRepos(false);
+  const verifyAndSaveToken = useCallback(async (newToken) => {
+    if (!newToken || !newToken.trim()) {
+      setToken('');
+      setUser(null);
+      localStorage.removeItem(STORAGE_KEY);
+      return false;
     }
-  }, [githubToken]);
 
-  const handleSaveToken = useCallback((token, user) => {
-    setGithubToken(token);
-    setGithubUser(user);
-    localStorage.setItem('carbotrace_github_token', token);
-    localStorage.setItem('carbotrace_github_user', JSON.stringify(user));
-    fetchUserRepos(token);
-  }, [fetchUserRepos]);
-
-  const handleClearToken = useCallback(() => {
-    setGithubToken('');
-    setGithubUser(null);
-    setUserRepos([]);
-    localStorage.removeItem('carbotrace_github_token');
-    localStorage.removeItem('carbotrace_github_user');
+    setLoading(true);
+    setError(null);
+    try {
+      const profile = await api.validateGithubToken(newToken.trim());
+      setToken(newToken.trim());
+      setUser(profile);
+      localStorage.setItem(STORAGE_KEY, newToken.trim());
+      setLoading(false);
+      return true;
+    } catch (err) {
+      setError(err.message || 'Invalid GitHub token');
+      setLoading(false);
+      return false;
+    }
   }, []);
 
+  const logout = useCallback(() => {
+    setToken('');
+    setUser(null);
+    setError(null);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  // On mount, if token exists, verify profile asynchronously
   useEffect(() => {
-    if (githubToken) {
-      fetchUserRepos(githubToken);
+    if (!token) {
+      return;
     }
-  }, [githubToken, fetchUserRepos]);
+
+    let ignore = false;
+    api.validateGithubToken(token)
+      .then((profile) => {
+        if (!ignore) {
+          setUser(profile);
+          setError(null);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setToken('');
+          setUser(null);
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [token]);
 
   return {
-    githubToken,
-    githubUser,
-    userRepos,
-    isFetchingRepos,
-    fetchUserRepos,
-    handleSaveToken,
-    handleClearToken
+    token,
+    user,
+    loading,
+    error,
+    saveToken: verifyAndSaveToken,
+    logout,
+    isAuthenticated: Boolean(token && user),
   };
 }

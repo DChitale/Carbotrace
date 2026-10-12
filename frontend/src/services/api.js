@@ -1,95 +1,101 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-
 /**
- * Health check endpoint
+ * Carbotrace API Service
+ * Interacts with FastAPI backend endpoints under /api
  */
-export async function checkHealth(signal) {
-  const res = await fetch(`${API_BASE_URL}/health`, { signal });
-  if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
-  return res.json();
-}
 
-/**
- * Fetch scan history
- */
-export async function fetchHistory() {
-  const res = await fetch(`${API_BASE_URL}/repos`);
-  if (!res.ok) throw new Error(`Failed to fetch history: ${res.status}`);
-  return res.json();
-}
+const API_BASE = '/api';
 
-/**
- * Fetch user repositories using GitHub PAT
- */
-export async function fetchUserRepos(token) {
-  if (!token) return [];
-  const res = await fetch(`${API_BASE_URL}/github/user-repos`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token })
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Failed to fetch repositories');
+class ApiError extends Error {
+  constructor(message, status, detail = null) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.detail = detail;
   }
-  return res.json();
 }
 
-/**
- * Validate GitHub token & fetch profile
- */
-export async function fetchGithubUser(token) {
-  const res = await fetch(`${API_BASE_URL}/github/user`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token })
-  });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Failed to validate token');
-  }
-  return res.json();
-}
-
-/**
- * Trigger repository carbon analysis
- */
-export async function analyzeRepo({ repoUrl, branch = 'main', token = null }) {
-  const payload = {
-    repo_url: repoUrl.trim(),
-    branch: branch || 'main'
+async function request(endpoint, options = {}) {
+  const url = `${API_BASE}${endpoint}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
   };
-  if (token) {
-    payload.github_token = token;
-  }
 
-  const res = await fetch(`${API_BASE_URL}/analyze-repo`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+  const response = await fetch(url, {
+    ...options,
+    headers,
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.detail || 'Analysis failed. Please check repository URL or backend logs.');
+  let data;
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+  } else {
+    data = await response.text();
   }
+
+  if (!response.ok) {
+    const errorMsg =
+      (typeof data === 'object' && data?.detail)
+        ? data.detail
+        : `Request failed with status ${response.status}`;
+    throw new ApiError(errorMsg, response.status, data);
+  }
+
   return data;
 }
 
-/**
- * Fetch repo details by ID
- */
-export async function fetchRepoDetails(repoId) {
-  const res = await fetch(`${API_BASE_URL}/repos/${repoId}`);
-  if (!res.ok) throw new Error(`Failed to fetch repo ${repoId}`);
-  return res.json();
-}
+export const api = {
+  // Analyze a GitHub repo (clones, runs AST/CI/Infra calculators)
+  analyzeRepo: async ({ repoUrl, branch = null, includeLlm = true, githubToken = null }) => {
+    return request('/analyze-repo', {
+      method: 'POST',
+      body: JSON.stringify({
+        repo_url: repoUrl,
+        branch: branch || undefined,
+        include_llm: includeLlm,
+        github_token: githubToken || undefined,
+      }),
+    });
+  },
 
-/**
- * Fetch specific analysis by ID
- */
-export async function fetchAnalysisDetails(analysisId) {
-  const res = await fetch(`${API_BASE_URL}/analyses/${analysisId}`);
-  if (!res.ok) throw new Error(`Failed to fetch analysis ${analysisId}`);
-  return res.json();
-}
+  // Get full analysis by analysis ID
+  getAnalysis: async (analysisId) => {
+    return request(`/analyses/${analysisId}`);
+  },
+
+  // List past repos with nested history
+  listRepos: async (skip = 0, limit = 50) => {
+    return request(`/repos?skip=${skip}&limit=${limit}`);
+  },
+
+  // Get single repo by repo ID
+  getRepo: async (repoId) => {
+    return request(`/repos/${repoId}`);
+  },
+
+  // Validate GitHub Personal Access Token
+  validateGithubToken: async (token) => {
+    return request('/github/user', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  // Fetch repositories belonging to the authenticated GitHub user
+  listUserGithubRepos: async (token) => {
+    return request('/github/user-repos', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  // Backend & database health check
+  checkHealth: async () => {
+    return request('/health');
+  },
+};
