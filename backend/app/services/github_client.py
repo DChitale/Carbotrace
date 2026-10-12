@@ -43,12 +43,13 @@ def parse_github_url(repo_url: str) -> Tuple[str, str]:
         raise ValueError(f"Invalid GitHub URL: {e}")
 
 
-async def clone_repository(repo_url: str, branch: Optional[str] = None) -> str:
-    """Clone a public GitHub repository to a local temporary directory.
+async def clone_repository(repo_url: str, branch: Optional[str] = None, github_token: Optional[str] = None) -> str:
+    """Clone a public or private GitHub repository to a local temporary directory.
 
     Args:
         repo_url: GitHub repository URL to clone.
         branch: Optional branch, tag, or commit ref to checkout.
+        github_token: Optional GitHub access token for cloning private repos.
 
     Returns:
         Absolute path to the cloned repository.
@@ -59,11 +60,19 @@ async def clone_repository(repo_url: str, branch: Optional[str] = None) -> str:
     """
     owner, repo_name = parse_github_url(repo_url)
     
+    # Construct target clone URL with token authentication if provided
+    token = github_token or settings.GITHUB_TOKEN
+    if token and token.strip():
+        token_clean = token.strip()
+        clone_url = f"https://x-access-token:{token_clean}@github.com/{owner}/{repo_name}.git"
+    else:
+        clone_url = repo_url
+
     # Generate unique folder name
     unique_id = uuid.uuid4().hex
     target_dir = os.path.join(settings.TEMP_CLONE_DIR, f"{owner}_{repo_name}_{unique_id}")
     
-    logger.info(f"Cloning {repo_url} (branch/ref: {branch or 'default'}) to {target_dir}...")
+    logger.info(f"Cloning {owner}/{repo_name} (branch/ref: {branch or 'default'}) to {target_dir}...")
     try:
         kwargs = {"depth": 1, "config": "core.longpaths=true", "allow_unsafe_options": True}
         
@@ -73,7 +82,7 @@ async def clone_repository(repo_url: str, branch: Optional[str] = None) -> str:
         if branch and not is_commit_sha:
             try:
                 kwargs["branch"] = branch
-                git.Repo.clone_from(repo_url, target_dir, **kwargs)
+                git.Repo.clone_from(clone_url, target_dir, **kwargs)
                 logger.info(f"Successfully cloned {repo_name} (branch: {branch}) to {target_dir}")
                 return target_dir
             except Exception as branch_err:
@@ -85,7 +94,7 @@ async def clone_repository(repo_url: str, branch: Optional[str] = None) -> str:
         if is_commit_sha:
             kwargs.pop("depth", None)
 
-        repo = git.Repo.clone_from(repo_url, target_dir, **kwargs)
+        repo = git.Repo.clone_from(clone_url, target_dir, **kwargs)
         
         if branch:
             try:

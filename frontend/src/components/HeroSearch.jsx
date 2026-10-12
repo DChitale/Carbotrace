@@ -1,5 +1,13 @@
 import React from 'react';
-import { Search, Play, RefreshCw, AlertTriangle, Code, Cpu, Server, Sparkles } from 'lucide-react';
+import { 
+  MagnifyingGlass, 
+  Play, 
+  ArrowClockwise, 
+  Warning, 
+  Code, 
+  Lightning, 
+  HardDrives 
+} from '@phosphor-icons/react';
 import GithubIcon from './GithubIcon';
 
 const PRESET_REPOS = [
@@ -15,67 +23,78 @@ export default function HeroSearch({
   handleAnalyze, 
   isLoading, 
   errorMsg, 
-  hasAnalysis 
+  hasAnalysis,
+  githubUser,
+  onOpenRepoModal
 }) {
   return (
-    <div className={`flex flex-col gap-6 transition-all duration-500 ${!hasAnalysis ? 'py-2' : ''}`}>
+    <div className={`flex flex-col gap-6 transition-all duration-300 ${!hasAnalysis ? 'py-1' : ''}`}>
       
-      {/* Hero Header (Shown prominent on empty dashboard) */}
+      {/* Empty State Header (Shown on fresh dashboard load) */}
       {!hasAnalysis && (
-        <div className="text-center max-w-3xl mx-auto flex flex-col items-center gap-3 animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 dark:text-emerald-400 text-xs font-semibold tracking-wide">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>GreenOps Static & Runtime Carbon Engine</span>
+        <div className="max-w-2xl flex flex-col gap-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-medium tracking-wide self-start">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>GREENOPS REPOSITORY AUDIT</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
-            Measure & Reduce your Software's{' '}
-            <span className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-400 bg-clip-text text-transparent">
-              Carbon Footprint
-            </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Audit repository emissions
           </h2>
-          <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
-            Audit AST code patterns, CI/CD pipeline triggers, and cloud infrastructure directly from any GitHub repository.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Run static AST analysis, CI/CD power curves, and cloud grid carbon telemetry for any GitHub repository.
           </p>
         </div>
       )}
 
-      {/* Search Bar Panel */}
-      <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 animate-fade-up delay-100 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
+      {/* Command Bar Search Panel */}
+      <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col gap-4 shadow-xl relative overflow-hidden">
+        
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200 flex items-center gap-2">
-            <GithubIcon className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <GithubIcon className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
             <span>Target Repository</span>
-          </h3>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Public GitHub Repositories Supported</span>
+          </span>
+          <div className="flex items-center gap-2.5">
+            {githubUser && (
+              <button
+                type="button"
+                onClick={onOpenRepoModal}
+                className="btn-press text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1.5"
+              >
+                <GithubIcon className="w-3 h-3" />
+                <span>Select from My Repositories</span>
+              </button>
+            )}
+            <span className="text-[11px] text-slate-500 font-mono hidden sm:inline">Public & Private Supported</span>
+          </div>
         </div>
 
-        <form onSubmit={handleAnalyze} className="flex flex-col sm:flex-row gap-3">
+        <form onSubmit={handleAnalyze} className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+            <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="url"
               placeholder="https://github.com/owner/repository"
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               required
-              className="w-full glass-input rounded-xl py-3 pl-11 pr-4 text-sm placeholder-slate-400 dark:placeholder-slate-500 font-mono focus:outline-none"
+              aria-label="GitHub Repository URL"
+              className="w-full glass-input rounded-xl py-2.5 pl-10 pr-4 text-xs sm:text-sm placeholder-slate-400 dark:placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="relative group bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50 text-sm cursor-pointer shadow-lg shadow-emerald-500/20 active:scale-95 shrink-0"
+            className="btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-5 py-2.5 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 text-xs sm:text-sm cursor-pointer shadow-sm active:scale-98 shrink-0"
           >
             {isLoading ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                <span>Analyzing...</span>
+                <ArrowClockwise size={15} weight="bold" className="animate-spin text-slate-950" />
+                <span>Auditing...</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-slate-950 text-slate-950" />
+                <Play size={14} weight="fill" className="text-slate-950" />
                 <span>Run Carbon Audit</span>
               </>
             )}
@@ -83,14 +102,14 @@ export default function HeroSearch({
         </form>
 
         {/* Preset Repositories Quick-Select */}
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/60">
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Try quick sample:</span>
+        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/80 dark:border-white/[0.06]">
+          <span className="text-[11px] font-mono text-slate-500">Samples:</span>
           {PRESET_REPOS.map((preset, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => setRepoUrl(preset.url)}
-              className="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-200/60 hover:bg-slate-300/80 dark:bg-slate-800/40 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-300 transition cursor-pointer"
+              className="btn-press text-[11px] font-mono px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer"
             >
               {preset.label}
             </button>
@@ -98,45 +117,62 @@ export default function HeroSearch({
         </div>
 
         {errorMsg && (
-          <div className="bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-300 px-4 py-3 rounded-xl text-xs flex items-center gap-2.5 animate-fade-scale">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
+          <div className="bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2.5 animate-fade-scale">
+            <Warning size={16} weight="fill" className="shrink-0 text-rose-500" />
             <span>{errorMsg}</span>
           </div>
         )}
       </div>
 
-      {/* Feature Showcase Grid (Shown on empty dashboard) */}
+      {/* Asymmetric Overview Strip (Shown on empty dashboard) */}
       {!hasAnalysis && !isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-fade-up delay-200 mt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-up mt-1">
           
-          <div className="glass-card p-5 rounded-2xl flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
-              <Code className="w-5 h-5" />
+          <div className="lg:col-span-5 glass-card p-5 rounded-2xl flex flex-col justify-between gap-3 border-l-4 border-l-emerald-500">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">AST Analysis</span>
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                <Code size={16} weight="duotone" />
+              </div>
             </div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">Layer 1: AST Code Footprint</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Scans Abstract Syntax Trees via tree-sitter to detect nested loops, heavy package imports, and unoptimized test runs.
-            </p>
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Layer 1: Code Carbon</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                Scans Abstract Syntax Trees via tree-sitter to detect nested algorithmic loops, package weights, and test durations.
+              </p>
+            </div>
           </div>
 
-          <div className="glass-card p-5 rounded-2xl flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 dark:text-amber-400">
-              <Cpu className="w-5 h-5" />
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="glass-card p-5 rounded-2xl flex flex-col justify-between gap-3 border-l-4 border-l-amber-500">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">CI Execution</span>
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                  <Lightning size={16} weight="duotone" />
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Layer 2: CI/CD Pipeline</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                  Evaluates workflow matrix runner wattages, missing cache penalties, and PR rerun overhead.
+                </p>
+              </div>
             </div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">Layer 2: CI/CD Pipeline Carbon</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Calculates workflow matrix execution times, hardware wattages, caching penalties, and redundant PR build costs.
-            </p>
-          </div>
 
-          <div className="glass-card p-5 rounded-2xl flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 dark:text-blue-400">
-              <Server className="w-5 h-5" />
+            <div className="glass-card p-5 rounded-2xl flex flex-col justify-between gap-3 border-l-4 border-l-sky-500">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-sky-600 dark:text-sky-400 font-bold uppercase tracking-wider">Cloud Energy</span>
+                <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500">
+                  <HardDrives size={16} weight="duotone" />
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Layer 3: Infrastructure</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                  Parses Terraform and CloudFormation for instance wattages and real-time regional grid carbon intensity.
+                </p>
+              </div>
             </div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">Layer 3: Infrastructure IaC</h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Parses Terraform and CloudFormation for cloud instance types, grid carbon intensity (Electricity Maps), and embodied carbon.
-            </p>
           </div>
 
         </div>

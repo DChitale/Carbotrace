@@ -1,77 +1,91 @@
 import React from 'react';
-import { Home, Search, History, ExternalLink, Sun, Moon, Leaf } from 'lucide-react';
+import { 
+  House, 
+  MagnifyingGlass, 
+  ClockCounterClockwise, 
+  Globe, 
+  Sun, 
+  Moon, 
+  Leaf 
+} from '@phosphor-icons/react';
 import GithubIcon from './GithubIcon';
 
-export default function Navbar({ activePage, setActivePage, theme, toggleTheme }) {
+export default function Navbar({ activePage, setActivePage, theme, toggleTheme, githubUser, onOpenAuthModal, onOpenRepoModal }) {
   return (
-    <header className="glass-panel sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 py-3.5 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+    <header className="glass-panel sticky top-0 z-50 border-b border-slate-200/80 dark:border-white/[0.06] px-4 sm:px-6 py-2.5 backdrop-blur-2xl">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
         
         {/* Brand Identity */}
         <div 
-          className="flex items-center gap-2.5 cursor-pointer group" 
+          className="flex items-center gap-2.5 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-xl p-1" 
           onClick={() => setActivePage('home')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActivePage('home'); }}
         >
-          <div className="relative flex items-center justify-center">
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl blur-sm opacity-40 group-hover:opacity-80 transition duration-300"></div>
-            <div className="relative bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/30 text-emerald-500 dark:text-emerald-400">
-              <Leaf className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-            </div>
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-500 dark:text-emerald-400 group-hover:border-emerald-500/50 transition duration-200">
+            <Leaf size={18} weight="fill" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 dark:from-emerald-300 dark:via-teal-200 dark:to-cyan-300 bg-clip-text text-transparent">
-                Carbotrace
-              </h1>
-              <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                v1.0
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-wide hidden sm:block">
-              Carbon-Aware Software Analytics
-            </p>
+          <div className="flex flex-col">
+            <span className="text-[15px] font-bold tracking-tight text-slate-900 dark:text-white">
+              Carbotrace
+            </span>
+            <span className="text-[10px] font-mono text-slate-500 tracking-wider hidden sm:block uppercase">
+              Carbon Intelligence
+            </span>
           </div>
         </div>
 
-        {/* Navigation & Actions */}
+        {/* Navigation Tabs & Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Page Tabs */}
-          <nav className="flex items-center bg-slate-200/70 dark:bg-[#090e1a]/80 p-1 rounded-xl border border-slate-300/80 dark:border-slate-800/80">
-            
+          {/* Segmented Page Tabs */}
+          <nav className="flex items-center bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.06]" aria-label="Main Navigation">
             <button 
               onClick={() => setActivePage('home')}
-              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`btn-press px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 activePage === 'home' 
-                  ? 'bg-white dark:bg-slate-800/90 text-emerald-600 dark:text-emerald-300 shadow-sm border border-slate-200 dark:border-slate-700/80' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40'
+                  ? 'bg-white dark:bg-white/[0.1] text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm border border-slate-200 dark:border-white/[0.08]' 
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Home className="w-3.5 h-3.5" />
+              <House size={14} weight={activePage === 'home' ? 'fill' : 'regular'} />
               <span>Home</span>
             </button>
 
             <button 
               onClick={() => setActivePage('dashboard')}
-              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`btn-press px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 activePage === 'dashboard' 
-                  ? 'bg-white dark:bg-slate-800/90 text-emerald-600 dark:text-emerald-300 shadow-sm border border-slate-200 dark:border-slate-700/80' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40'
+                  ? 'bg-white dark:bg-white/[0.1] text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm border border-slate-200 dark:border-white/[0.08]' 
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Search className="w-3.5 h-3.5" />
+              <MagnifyingGlass size={14} weight={activePage === 'dashboard' ? 'bold' : 'regular'} />
               <span>Dashboard</span>
             </button>
 
             <button 
-              onClick={() => setActivePage('history')}
-              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activePage === 'history' 
-                  ? 'bg-white dark:bg-slate-800/90 text-emerald-600 dark:text-emerald-300 shadow-sm border border-slate-200 dark:border-slate-700/80' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40'
+              onClick={() => setActivePage('grid-map')}
+              className={`btn-press px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                activePage === 'grid-map' 
+                  ? 'bg-white dark:bg-white/[0.1] text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm border border-slate-200 dark:border-white/[0.08]' 
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <History className="w-3.5 h-3.5" />
+              <Globe size={14} weight={activePage === 'grid-map' ? 'bold' : 'regular'} />
+              <span>Grid Map</span>
+            </button>
+
+            <button 
+              onClick={() => setActivePage('history')}
+              className={`btn-press px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                activePage === 'history' 
+                  ? 'bg-white dark:bg-white/[0.1] text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm border border-slate-200 dark:border-white/[0.08]' 
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <ClockCounterClockwise size={14} weight={activePage === 'history' ? 'bold' : 'regular'} />
               <span>History</span>
             </button>
           </nav>
@@ -79,29 +93,53 @@ export default function Navbar({ activePage, setActivePage, theme, toggleTheme }
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            aria-label="Toggle Theme"
-            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-slate-800/60 hover:bg-slate-300/80 dark:hover:bg-slate-800 border border-slate-300/80 dark:border-slate-800 transition cursor-pointer flex items-center justify-center"
+            aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            className="btn-press p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] transition cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
           >
             {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-amber-400" />
+              <Sun size={16} weight="fill" className="text-amber-400" />
             ) : (
-              <Moon className="w-4 h-4 text-indigo-600" />
+              <Moon size={16} weight="fill" className="text-slate-700" />
             )}
           </button>
 
-          {/* GitHub Link */}
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noreferrer"
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-200/60 dark:bg-slate-800/40 hover:bg-slate-300/80 dark:hover:bg-slate-800/80 border border-slate-300/80 dark:border-slate-800 transition"
-          >
-            <GithubIcon className="w-3.5 h-3.5" />
-            <span>GitHub</span>
-            <ExternalLink className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-          </a>
+          {/* GitHub Auth Section */}
+          {githubUser ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onOpenRepoModal}
+                className="btn-press bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              >
+                <GithubIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">My Repositories</span>
+              </button>
 
+              <button
+                onClick={onOpenAuthModal}
+                className="btn-press flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.06] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                title="Account Settings"
+                aria-label={`Account settings for ${githubUser.login}`}
+              >
+                <img
+                  src={githubUser.avatar_url}
+                  alt={`${githubUser.login}'s profile picture`}
+                  className="w-5 h-5 rounded-md border border-emerald-500/40 object-cover"
+                />
+                <span className="text-xs font-mono font-medium text-slate-700 dark:text-slate-300 hidden md:inline">
+                  @{githubUser.login}
+                </span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuthModal}
+              className="btn-press flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-950 bg-emerald-500 hover:bg-emerald-400 shadow-sm transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+            >
+              <GithubIcon className="w-3.5 h-3.5" />
+              <span>Connect GitHub</span>
+            </button>
+          )}
         </div>
 
       </div>

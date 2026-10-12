@@ -255,6 +255,10 @@ async def get_package_size(
 async def analyze_dependencies(db: AsyncSession, repo_dir: str) -> Dict[str, any]:
     """Scrapes a repository directory for package files and calculates dependency carbon.
 
+    Uses the SCI-based energy estimation approach:
+    - install_energy_kwh = size_mb × 0.000015 (empirical: ~15 µWh/MB for download+install)
+    - carbon = install_energy_kwh × grid_intensity (475 gCO2/kWh global average)
+
     Returns a details dictionary.
     """
     dependencies = []
@@ -292,12 +296,20 @@ async def analyze_dependencies(db: AsyncSession, repo_dir: str) -> Dict[str, any
         total_size_bytes = num_deps * DEFAULT_PACKAGE_SIZE_BYTES
 
     size_mb = total_size_bytes / (1024 * 1024)
-    carbon_emissions = (num_deps * 0.5) + (size_mb * 0.12)
+
+    # SCI-based carbon estimation (ISO/IEC 21031:2024)
+    # Empirical: ~15 µWh per MB for package download + install (CodeCarbon measurements)
+    # Grid intensity: 475 gCO2/kWh global average (CCF/Electricity Maps)
+    ENERGY_PER_MB_KWH = 0.000015  # 15 µWh/MB = 0.000015 kWh/MB
+    GRID_INTENSITY = 475.0        # gCO2/kWh global average
+    install_energy_kwh = size_mb * ENERGY_PER_MB_KWH
+    carbon_emissions = install_energy_kwh * GRID_INTENSITY
 
     return {
         "num_dependencies": num_deps,
-        "size_mb": size_mb,
-        "carbon": carbon_emissions,
+        "size_mb": round(size_mb, 2),
+        "carbon": round(carbon_emissions, 4),
         "registry": registry,
         "packages": [{"name": n, "version": v} for n, v in dependencies]
     }
+

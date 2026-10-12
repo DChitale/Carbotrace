@@ -46,7 +46,14 @@ app = FastAPI(
 # Set up CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://localhost:8001",
+    ],
+    allow_origin_regex=r"http://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,4 +61,16 @@ app.add_middleware(
 
 # Mount API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.get("/")
+@app.get("/api")
+async def root():
+    return {
+        "status": "online",
+        "app": settings.APP_NAME,
+        "version": "0.1.0",
+        "docs": "/docs",
+        "health": f"{settings.API_V1_STR}/health"
+    }
 

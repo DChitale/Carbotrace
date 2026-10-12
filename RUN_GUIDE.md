@@ -75,9 +75,15 @@ docker run -d `
 
 ### Step 2: Start Backend (FastAPI)
 
-1. Open a terminal and navigate to the `backend` directory:
+> ⚡ **Windows One-Click Shortcut:**
+> Double-click **`run_all.bat`** (or in PowerShell type `.\run_all.bat` / `.\run_all.ps1`) to automatically free ports 8001 & 5173, start TimescaleDB container, and boot both FastAPI and Vite services!
+> Or double-click **`run_backend.bat`** (PowerShell: `.\run_backend.bat`) for backend only.
+
+Alternatively, start manually:
+
+1. Open a terminal and navigate to the project root:
    ```bash
-   cd d:\Projects\Carbotrace\backend
+   cd d:\Projects\Carbotrace
    ```
 
 2. Create and activate a Python virtual environment:

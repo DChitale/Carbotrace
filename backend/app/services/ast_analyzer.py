@@ -226,9 +226,22 @@ async def analyze_ast_patterns(repo_dir: str) -> Dict[str, Any]:
             except Exception as e:
                 logger.error(f"Error analyzing AST for file {file_path}: {e}")
 
-    # Carbon scoring formula:
-    # Pattern_Carbon = (Nested_Loops * 50) + (N+1 * 75) + (Unused_Imports * 5)
-    pattern_carbon = (total_nested_loops * 50) + (total_n_plus_one * 75) + (total_unused_imports * 5)
+    # Efficiency penalty scoring (dimensionless points, not grams CO2)
+    # Per GREENS 2025 / ICSE 2025: static AST analysis detects efficiency
+    # *signals*, not actual carbon measurements. These are relative deductions
+    # from a perfect eco-score.
+    #   Nested loops:    3 points each (computational complexity signal)
+    #   N+1 queries:     5 points each (database inefficiency signal)
+    #   Unused imports:  0.5 points each (dead code / bloat signal)
+    #   Large files:     1 point each (maintainability signal)
+    penalty_points = (
+        (total_nested_loops * 3.0)
+        + (total_n_plus_one * 5.0)
+        + (total_unused_imports * 0.5)
+        + (large_files_count * 1.0)
+    )
+    # Cap penalty at 40 points to avoid overwhelming the eco-score
+    penalty_points = min(penalty_points, 40.0)
 
     return {
         "files_scanned": total_files_scanned,
@@ -237,5 +250,6 @@ async def analyze_ast_patterns(repo_dir: str) -> Dict[str, Any]:
         "unused_imports": total_unused_imports,
         "unused_imports_details": unused_imports_details,
         "large_files": large_files_count,
-        "carbon": pattern_carbon
+        "penalty_points": round(penalty_points, 1),
+        "carbon": round(penalty_points, 1)  # kept as "carbon" key for backward compat
     }

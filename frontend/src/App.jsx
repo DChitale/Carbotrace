@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
+import GridEnergyMap from './components/GridEnergyMap';
 import HeroSearch from './components/HeroSearch';
 import LoadingState from './components/LoadingState';
 import ScoreGauge from './components/ScoreGauge';
@@ -10,77 +12,87 @@ import RiskList from './components/RiskList';
 import RecommendationCard from './components/RecommendationCard';
 import HistoryTable from './components/HistoryTable';
 import Footer from './components/Footer';
+import GithubAuthModal from './components/GithubAuthModal';
+import RepoSelectorModal from './components/RepoSelectorModal';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api';
+import { useTheme } from './hooks/useTheme';
+import { useGithubAuth } from './hooks/useGithubAuth';
+import { useReducedMotion } from './hooks/useReducedMotion';
+import { 
+  API_BASE_URL,
+  checkHealth, 
+  fetchHistory as apiFetchHistory, 
+  analyzeRepo as apiAnalyzeRepo, 
+  fetchRepoDetails, 
+  fetchAnalysisDetails 
+} from './services/api';
 
 export default function App() {
-  const [page, setPage] = useState('home'); // 'home', 'dashboard', 'history'
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [page, setPage] = useState('home'); // 'home', 'dashboard', 'grid-map', 'history'
+  const { theme, toggleTheme } = useTheme();
+  const prefersReduced = useReducedMotion();
+
   const [repoUrl, setRepoUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState('');
   const [currentAnalysis, setCurrentAnalysis] = useState(null);
   const [historyList, setHistoryList] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+  const [scanningRepoUrl, setScanningRepoUrl] = useState('');
 
-  // Handle Theme switching & persistence
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  // Modals state
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isRepoModalOpen, setIsRepoModalOpen] = useState(false);
 
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-  };
+  // GitHub Auth Custom Hook
+  const {
+    githubToken,
+    githubUser,
+    userRepos,
+    isFetchingRepos,
+    fetchUserRepos,
+    handleSaveToken
+  } = useGithubAuth();
 
   // Fetch scan history
-  const fetchHistory = async () => {
+  const loadHistory = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/repos`);
-      if (res.ok) {
-        const data = await res.json();
-        setHistoryList(data);
-      }
+      const data = await apiFetchHistory();
+      setHistoryList(data);
     } catch (err) {
       console.error('Failed to fetch history:', err);
     }
   };
 
   useEffect(() => {
-    fetchHistory();
+    loadHistory();
   }, []);
 
-  // Check if backend API server is online
+  // Health check verification
   const checkBackendHealth = async () => {
+    const serverUrl = API_BASE_URL.replace(/\/api\/?$/, '');
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
-      const res = await fetch(`${API_BASE_URL}/health`, { signal: controller.signal });
+      await checkHealth(controller.signal);
       clearTimeout(timeoutId);
-      if (!res.ok) {
-        return { ok: false, error: `Backend server error (status ${res.status}).` };
-      }
       return { ok: true };
     } catch (err) {
       if (err.name === 'AbortError') {
-        return { ok: false, error: 'Backend connection timed out. Make sure FastAPI server is running on http://localhost:8001.' };
+        return { ok: false, error: `Backend connection timed out. Make sure FastAPI server is running on ${serverUrl}.` };
       }
-      return { ok: false, error: 'Backend server is offline or unreachable. Please start the FastAPI backend (e.g., uvicorn backend.app.main:app --reload --port 8001).' };
+      return { ok: false, error: `Backend server is offline or unreachable at ${serverUrl}. Click run_backend.bat or start the server with uvicorn.` };
     }
   };
 
   // Trigger repository analysis
-  const handleAnalyze = async (e) => {
+  const handleAnalyze = async (e, targetUrl, targetBranch) => {
     if (e) e.preventDefault();
-    if (!repoUrl) return;
+    const target = targetUrl || repoUrl;
+    if (!target) return;
 
+    setRepoUrl(target);
+    setScanningRepoUrl(target);
     setErrorMsg('');
     setCurrentAnalysis(null);
 
@@ -88,6 +100,7 @@ export default function App() {
     const health = await checkBackendHealth();
     if (!health.ok) {
       setErrorMsg(health.error);
+      setScanningRepoUrl('');
       return;
     }
 
@@ -112,27 +125,36 @@ export default function App() {
     }, 1500);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/analyze-repo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repo_url: repoUrl })
+      const data = await apiAnalyzeRepo({
+        repoUrl: target,
+        branch: targetBranch,
+        token: githubToken || null
       });
       clearInterval(stageInterval);
 
-      if (res.ok) {
-        const data = await res.json();
-        setCurrentAnalysis(data);
-        fetchHistory();
-      } else {
-        const errData = await res.json();
-        setErrorMsg(errData.detail || 'Analysis failed. Make sure the GitHub URL is public and valid.');
-      }
+      setCurrentAnalysis(data);
+      loadHistory();
+      setPage('dashboard');
     } catch (err) {
       clearInterval(stageInterval);
-      setErrorMsg('Failed to connect to backend server. Make sure FastAPI is running on port 8001.');
+      setErrorMsg(err.message || 'Analysis failed. Make sure the GitHub URL is valid and accessible.');
     } finally {
       setIsLoading(false);
+      setScanningRepoUrl('');
     }
+  };
+
+  // Trigger fresh scan for current codebase of a historical repo
+  const handleScanCurrentCode = async (repo) => {
+    setPage('dashboard');
+    handleAnalyze(null, repo.url);
+  };
+
+  // Select repo from RepoSelectorModal
+  const handleSelectRepoFromModal = (repo) => {
+    setIsRepoModalOpen(false);
+    setPage('dashboard');
+    handleAnalyze(null, repo.html_url, repo.default_branch);
   };
 
   // Load a historical analysis
@@ -140,42 +162,45 @@ export default function App() {
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch(`${API_BASE_URL}/repos/${repo.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.history && data.history.length > 0) {
-          const latestAnalysisRes = await fetch(`${API_BASE_URL}/analyses/${data.history[0].id}`);
-          if (latestAnalysisRes.ok) {
-            const fullAnalysis = await latestAnalysisRes.json();
-            setCurrentAnalysis(fullAnalysis);
-            setRepoUrl(repo.url);
-            setPage('dashboard');
-          }
-        }
+      const repoDetails = await fetchRepoDetails(repo.id);
+      if (repoDetails.history && repoDetails.history.length > 0) {
+        const fullAnalysis = await fetchAnalysisDetails(repoDetails.history[0].id);
+        setCurrentAnalysis(fullAnalysis);
+        setRepoUrl(repo.url);
+        setPage('dashboard');
       }
     } catch (err) {
+      console.error('Failed to load analysis details:', err);
       setErrorMsg('Failed to load analysis details.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const dashboardAnimProps = prefersReduced
+    ? {}
+    : {
+        initial: { opacity: 0, y: 16 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+      };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 flex flex-col font-sans relative selection:bg-emerald-500/30 selection:text-emerald-500 transition-colors duration-300">
+    <div className="min-h-[100dvh] bg-[#fbfcfd] dark:bg-[#08090d] text-slate-900 dark:text-slate-100 flex flex-col font-sans relative selection:bg-emerald-500/25 selection:text-emerald-500 transition-colors duration-250">
       
-      {/* Ambient Animated Aurora Gradient Blobs */}
-      <div className="aurora-bg">
-        <div className="aurora-blob aurora-1"></div>
-        <div className="aurora-blob aurora-2"></div>
-        <div className="aurora-blob aurora-3"></div>
-      </div>
+      {/* Precision Ambient Glow & Dot Texture */}
+      <div className="ambient-glow" aria-hidden="true" />
+      <div className="fixed inset-0 bg-dot-mesh pointer-events-none z-0 opacity-40 dark:opacity-60" aria-hidden="true" />
 
       {/* Top Navbar */}
       <Navbar 
         activePage={page} 
         setActivePage={setPage} 
         theme={theme} 
-        toggleTheme={toggleTheme} 
+        toggleTheme={toggleTheme}
+        githubUser={githubUser}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenRepoModal={() => setIsRepoModalOpen(true)}
       />
 
       {/* Main Content Body */}
@@ -198,6 +223,8 @@ export default function App() {
               isLoading={isLoading}
               errorMsg={errorMsg}
               hasAnalysis={Boolean(currentAnalysis)}
+              githubUser={githubUser}
+              onOpenRepoModal={() => setIsRepoModalOpen(true)}
             />
 
             {/* Loading Indicator */}
@@ -207,8 +234,10 @@ export default function App() {
 
             {/* Analysis Dashboard Grid */}
             {currentAnalysis && !isLoading && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up">
-                
+              <motion.div 
+                className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+                {...dashboardAnimProps}
+              >
                 {/* Left Column (1/3): Score Gauge & Emissions Chart */}
                 <div className="lg:col-span-1 flex flex-col gap-6">
                   <ScoreGauge totalScore={currentAnalysis.total_score} />
@@ -232,11 +261,15 @@ export default function App() {
 
                   <RecommendationCard recommendations={currentAnalysis.recommendations} />
                 </div>
-
-              </div>
+              </motion.div>
             )}
 
           </div>
+        )}
+
+        {/* Global Cloud Energy Grid Map */}
+        {page === 'grid-map' && (
+          <GridEnergyMap />
         )}
 
         {/* Scan History Page */}
@@ -244,11 +277,34 @@ export default function App() {
           <HistoryTable 
             historyList={historyList}
             handleLoadAnalysis={handleLoadAnalysis}
+            handleScanCurrentCode={handleScanCurrentCode}
             setActivePage={setPage}
+            scanningRepoUrl={scanningRepoUrl}
           />
         )}
 
       </main>
+
+      {/* GitHub Authentication Modal */}
+      <GithubAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        githubToken={githubToken}
+        setGithubToken={(tok) => handleSaveToken(tok, githubUser)}
+        githubUser={githubUser}
+        setGithubUser={(usr) => handleSaveToken(githubToken, usr)}
+        onAuthSuccess={(token, user) => handleSaveToken(token, user)}
+      />
+
+      {/* Repository Selector Modal */}
+      <RepoSelectorModal
+        isOpen={isRepoModalOpen}
+        onClose={() => setIsRepoModalOpen(false)}
+        repos={userRepos}
+        isLoading={isFetchingRepos}
+        onRefresh={() => fetchUserRepos(githubToken)}
+        onSelectRepo={handleSelectRepoFromModal}
+      />
 
       {/* Footer */}
       <Footer />

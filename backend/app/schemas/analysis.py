@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -8,15 +8,44 @@ class AnalyzeRepoRequest(BaseModel):
     branch: Optional[str] = None
     include_infra: Optional[bool] = True
     include_llm: Optional[bool] = True
+    github_token: Optional[str] = None
+
+
+class GitHubAuthRequest(BaseModel):
+    token: str
+
+
+class GitHubUserResponse(BaseModel):
+    login: str
+    name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    html_url: Optional[str] = None
+    public_repos: Optional[int] = 0
+    total_private_repos: Optional[int] = 0
+
+
+class GitHubRepoItem(BaseModel):
+    id: int
+    name: str
+    full_name: str
+    private: bool
+    html_url: str
+    description: Optional[str] = None
+    language: Optional[str] = None
+    default_branch: Optional[str] = "main"
+    updated_at: Optional[str] = None
+
 
 
 class RiskItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     layer: str
     severity: str
     message: str
 
 
 class RecommendationItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     issue: str
     description: str
     savings_percent: float
@@ -25,17 +54,20 @@ class RecommendationItem(BaseModel):
 
 
 class LayerBreakdown(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     carbon: float
     breakdown: Dict[str, Any]
 
 
 class LayersBreakdown(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     code: LayerBreakdown
     ci: LayerBreakdown
     infra: LayerBreakdown
 
 
 class AnalysisResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     repo_id: int
     total_score: float
@@ -47,11 +79,9 @@ class AnalysisResponse(BaseModel):
     risks: Optional[List[RiskItem]] = None
     recommendations: Optional[List[RecommendationItem]] = None
 
-    class Config:
-        from_attributes = True
-
 
 class RepoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     url: str
     name: str
@@ -59,6 +89,3 @@ class RepoResponse(BaseModel):
     language: Optional[str] = None
     last_analyzed_at: datetime
     history: Optional[List[AnalysisResponse]] = None
-
-    class Config:
-        from_attributes = True

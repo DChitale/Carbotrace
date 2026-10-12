@@ -31,7 +31,7 @@ async def analyze_repo(
         
     # 1. Clone repository to local temp dir
     try:
-        temp_dir = await clone_repository(repo_url, branch=request.branch)
+        temp_dir = await clone_repository(repo_url, branch=request.branch, github_token=request.github_token)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cloning failed: {e}")
         

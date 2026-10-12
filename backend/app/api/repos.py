@@ -8,6 +8,7 @@ from backend.app.database import get_db
 from backend.app.models.repo import Repository
 from backend.app.models.analysis import Analysis
 from backend.app.schemas.analysis import RepoResponse, AnalysisResponse
+from backend.app.utils.logger import logger
 
 router = APIRouter()
 
@@ -15,14 +16,39 @@ router = APIRouter()
 @router.get("/repos", response_model=List[RepoResponse])
 async def list_repositories(
     skip: int = 0,
-    limit: int = 20,
+    limit: int = 50,
     db: AsyncSession = Depends(get_db)
 ):
-    """Retrieve previously analyzed repositories."""
-    stmt = select(Repository).offset(skip).limit(limit)
-    result = await db.execute(stmt)
-    repos = result.scalars().all()
-    return repos
+    """Retrieve previously analyzed repositories with their analysis history."""
+    try:
+        stmt = (
+            select(Repository)
+            .options(
+                selectinload(Repository.analyses).selectinload(Analysis.recommendations)
+            )
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await db.execute(stmt)
+        repos = result.scalars().all()
+
+        response = []
+        for r in repos:
+            sorted_analyses = sorted(r.analyses, key=lambda a: a.created_at, reverse=True)
+            response.append({
+                "id": r.id,
+                "url": r.url,
+                "name": r.name,
+                "owner": r.owner,
+                "language": r.language,
+                "last_analyzed_at": r.last_analyzed_at,
+                "history": sorted_analyses
+            })
+
+        return response
+    except Exception as e:
+        logger.warning(f"Database query failed in list_repositories (is database running?): {e}")
+        return []
 
 
 @router.get("/repos/{repo_id}", response_model=RepoResponse)

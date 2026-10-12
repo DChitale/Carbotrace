@@ -1,282 +1,357 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { 
-  Leaf, Play, ArrowRight, Code, Cpu, Server, Shield, Sparkles, 
-  CheckCircle2, Zap, BarChart3, Database, GitPullRequest, Terminal, HelpCircle 
-} from 'lucide-react';
-import GithubIcon from './GithubIcon';
+  Play, 
+  ArrowRight, 
+  Code, 
+  HardDrives, 
+  ShieldCheck, 
+  CheckCircle, 
+  Lightning, 
+  Database, 
+  GitPullRequest, 
+  TerminalWindow
+} from '@phosphor-icons/react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import heroPreviewImg from '../assets/hero-preview.jpg';
 
 export default function HomePage({ onGoToDashboard }) {
+  const prefersReduced = useReducedMotion();
+  const fadeUpProps = prefersReduced
+    ? {}
+    : {
+        initial: { opacity: 0, y: 16 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, margin: '-40px' },
+        transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] }
+      };
+
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="flex flex-col gap-12 py-4 animate-fade-up">
+    <div className="flex flex-col gap-16 py-4">
       
-      {/* Hero Section */}
-      <section className="relative overflow-hidden glass-panel-accent p-8 md:p-14 rounded-3xl flex flex-col items-center text-center gap-6 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        {/* Top Pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold tracking-wide">
-          <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>Production-Grade Software Carbon Analytics Platform</span>
-        </div>
-
-        {/* Main Title */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 max-w-4xl leading-[1.15]">
-          Measure & Reduce your Software's{' '}
-          <span className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-            Carbon Footprint
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-          Carbotrace provides GreenOps teams and developers with unified visibility into carbon severity across **Code-level patterns**, **CI/CD build pipelines**, and **Cloud Infrastructure**.
-        </p>
-
-        {/* Call to Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
-          <button
-            onClick={onGoToDashboard}
-            className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold px-8 py-3.5 rounded-2xl transition duration-200 flex items-center justify-center gap-3 text-sm cursor-pointer shadow-lg shadow-emerald-500/25 active:scale-95 group"
-          >
-            <Play className="w-4 h-4 fill-slate-950 text-slate-950" />
-            <span>Go to Dashboard & Scan Repo</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-
-          <button
-            onClick={() => scrollToSection('three-layers')}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-2xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/60 hover:bg-slate-300/80 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 transition cursor-pointer"
-          >
-            Explore 3-Layer Model
-          </button>
-        </div>
-
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mt-6 pt-6 border-t border-slate-200/80 dark:border-slate-800/80">
-          <div className="flex flex-col items-center">
-            <span className="text-xl md:text-2xl font-extrabold font-mono text-emerald-500 dark:text-emerald-400">3 Layers</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Code • CI/CD • Infra</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-xl md:text-2xl font-extrabold font-mono text-teal-500 dark:text-teal-400">0.0 - 10.0</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Carbon Severity Score</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-xl md:text-2xl font-extrabold font-mono text-cyan-500 dark:text-cyan-400">Local LLM</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Ollama Qwen 2.5 Coder</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-xl md:text-2xl font-extrabold font-mono text-amber-500 dark:text-amber-400">TimescaleDB</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Cached Analytics</span>
-          </div>
-        </div>
-
-      </section>
-
-      {/* Three-Layer Carbon Model Section */}
-      <section id="three-layers" className="flex flex-col gap-6 scroll-mt-20">
-        <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-2">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-            The Three-Layer Carbon Model
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-            Carbotrace bridges isolated developer silos by unifying AST code scanning, CI pipeline execution, and infrastructure hardware maps into a single metric.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Precision Hero Section */}
+      <section className="relative overflow-hidden glass-panel-accent p-6 sm:p-10 md:p-12 rounded-3xl shadow-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
           
-          {/* Layer 1: Code */}
-          <div className="glass-card p-6 rounded-2xl border-t-4 border-t-emerald-500 flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <Code className="w-6 h-6" />
+          {/* Left Column: Value Prop & CTAs (~55% width) */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left gap-5">
+            {/* Minimalist Eyebrow Tag */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-medium tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>SOFTWARE CARBON INTELLIGENCE</span>
             </div>
-            <div>
-              <span className="text-[11px] font-mono font-bold text-emerald-500 uppercase tracking-wider block mb-1">
-                Layer 1
+
+            {/* Main Title - Tight, confident typography */}
+            <h1 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-[-0.03em] text-slate-900 dark:text-white leading-[1.1]">
+              Decarbonize your software stack from{' '}
+              <span className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                code to cloud.
               </span>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Code-Level Carbon</h3>
+            </h1>
+
+            {/* Subtitle (<= 20 words per Section 4.7) */}
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
+              Unified carbon telemetry across AST code patterns, CI/CD runner wattages, and regional cloud infrastructure for modern engineering teams.
+            </p>
+
+            {/* Call to Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pt-2">
+              <button
+                onClick={onGoToDashboard}
+                className="btn-press w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm cursor-pointer shadow-md shadow-emerald-500/20 group"
+              >
+                <Play size={15} weight="fill" className="text-slate-950" />
+                <span>Start Free Audit</span>
+                <ArrowRight size={15} weight="bold" className="group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              <button
+                onClick={() => scrollToSection('three-layers')}
+                className="btn-press w-full sm:w-auto px-5 py-3 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.08] transition cursor-pointer"
+              >
+                Explore 3-Layer Model
+              </button>
             </div>
-            <ul className="flex flex-col gap-2.5 text-xs text-slate-600 dark:text-slate-300 flex-1">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Abstract Syntax Tree (AST) pattern scanning using <strong className="text-slate-800 dark:text-slate-100">tree-sitter</strong> (detecting nested loops, N+1 query patterns).</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Package dependency size & registry metrics (PyPI, npm, Maven, RubyGems).</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>Test suite execution footprint & CodeCarbon physical runtime parsing.</span>
-              </li>
-            </ul>
+
+            {/* Architecture Metrics Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full pt-6 mt-1 border-t border-slate-200 dark:border-white/[0.06]">
+              <div className="flex flex-col">
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">3 Layers</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">AST, CI/CD, Cloud</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">0.0 - 10.0</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Severity Score</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">Local LLM</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Qwen 2.5 Coder</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">Sub-second</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">TimescaleDB Cache</span>
+              </div>
+            </div>
           </div>
 
-          {/* Layer 2: CI/CD */}
-          <div className="glass-card p-6 rounded-2xl border-t-4 border-t-amber-500 flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-              <Zap className="w-6 h-6" />
+          {/* Right Column: Hero Visual Asset (~45% width) */}
+          <div className="lg:col-span-5 w-full">
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.1] shadow-2xl group bg-slate-950">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent z-10 pointer-events-none" />
+              <img 
+                src={heroPreviewImg} 
+                alt="Carbotrace carbon intelligence dashboard preview showing repository eco-score and real-time telemetry"
+                className="w-full h-auto object-cover transform group-hover:scale-[1.015] transition duration-500 ease-out"
+                loading="eager"
+              />
+              <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-950/80 backdrop-blur-md border border-white/10 text-[11px] font-mono text-slate-300">
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Live Telemetry
+                </span>
+                <span className="text-slate-400">SCI-Standardized</span>
+              </div>
             </div>
-            <div>
-              <span className="text-[11px] font-mono font-bold text-amber-500 uppercase tracking-wider block mb-1">
-                Layer 2
-              </span>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">CI/CD Pipeline Carbon</h3>
-            </div>
-            <ul className="flex flex-col gap-2.5 text-xs text-slate-600 dark:text-slate-300 flex-1">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <span>GitHub Actions workflow structure & run frequency matrix analysis.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <span>Runner hardware power profile estimations (Ubuntu vs macOS Apple Silicon vs Windows).</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <span>Redundant PR build calculations & package caching penalty checks.</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Layer 3: Infra */}
-          <div className="glass-card p-6 rounded-2xl border-t-4 border-t-blue-500 flex flex-col gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-              <Server className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-[11px] font-mono font-bold text-blue-500 uppercase tracking-wider block mb-1">
-                Layer 3
-              </span>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Infrastructure Carbon</h3>
-            </div>
-            <ul className="flex flex-col gap-2.5 text-xs text-slate-600 dark:text-slate-300 flex-1">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                <span>Infrastructure-as-Code (IaC) parsing for Terraform (<code className="font-mono text-[11px] px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-800">.tf</code>) & CloudFormation.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                <span>Live grid carbon intensity queries via <strong className="text-slate-800 dark:text-slate-100">Electricity Maps API</strong> (with regional PUE maps).</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                <span>AWS Cost Explorer integration for actual cloud instance usage.</span>
-              </li>
-            </ul>
           </div>
 
         </div>
       </section>
 
-      {/* Carbon Scoring Formula Section */}
-      <section className="glass-panel p-8 rounded-3xl flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-mono font-bold text-emerald-500 uppercase tracking-wider">Scoring Framework</span>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Master Carbon Severity Score (0.0 to 10.0)</h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-2xl">
-            The Carbon Severity Index normalizes multi-layer carbon footprints into a single 10-point scale for easy tracking in pull requests and GreenOps reports.
+      {/* Tech Stack Integration Strip */}
+      <section className="flex flex-col items-center gap-4 py-2" aria-label="Ecosystem Integrations">
+        <p className="text-[11px] font-mono text-slate-500 uppercase tracking-widest text-center">
+          Seamless integration across your developer infrastructure
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-mono font-medium text-slate-500 dark:text-slate-400">
+          <span className="hover:text-slate-900 dark:hover:text-white transition cursor-default">GitHub Actions</span>
+          <span className="text-slate-300 dark:text-slate-700">/</span>
+          <span className="hover:text-slate-900 dark:hover:text-white transition cursor-default">Terraform IaC</span>
+          <span className="text-slate-300 dark:text-slate-700">/</span>
+          <span className="hover:text-slate-900 dark:hover:text-white transition cursor-default">Docker Containers</span>
+          <span className="text-slate-300 dark:text-slate-700">/</span>
+          <span className="hover:text-slate-900 dark:hover:text-white transition cursor-default">AWS & GCP Cloud</span>
+          <span className="text-slate-300 dark:text-slate-700">/</span>
+          <span className="hover:text-slate-900 dark:hover:text-white transition cursor-default">Ollama Local AI</span>
+        </div>
+      </section>
+
+      {/* Three-Layer Carbon Architecture (Bento 2+1 Layout) */}
+      <motion.section id="three-layers" className="flex flex-col gap-6 scroll-mt-20" {...fadeUpProps}>
+        <div className="max-w-xl flex flex-col gap-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            The Three-Layer Carbon Architecture
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Unifying AST code scanning, CI pipeline execution, and cloud hardware topology into a single verifiable metric.
           </p>
         </div>
 
-        {/* Formula Box */}
-        <div className="bg-slate-900 text-emerald-400 p-5 rounded-2xl font-mono text-xs overflow-x-auto border border-emerald-500/30 shadow-inner">
-          <p className="text-slate-400 text-[11px] mb-1">// Standardized Carbon Severity Formula</p>
-          <p className="font-bold text-emerald-300">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          {/* Layer 1: Code Carbon (7-col primary card) */}
+          <div className="lg:col-span-7 glass-card p-6 sm:p-8 rounded-3xl border-l-4 border-l-emerald-500 flex flex-col justify-between gap-6">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                  Layer 1: Code Carbon
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                  <Code size={20} weight="duotone" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                Static AST Parsing & Algorithmic Hotspots
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Parses syntax trees via tree-sitter without executing arbitrary code, detecting deeply nested computational loops, oversized package dependencies, and inefficient test durations.
+              </p>
+            </div>
+
+            <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-100/60 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200 dark:border-white/[0.04]">
+              <div className="flex items-start gap-2.5">
+                <CheckCircle size={15} weight="fill" className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Detection of O(N²) or higher algorithmic complexity structures.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <CheckCircle size={15} weight="fill" className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Package weight evaluation across PyPI, npm, Maven, and RubyGems.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <CheckCircle size={15} weight="fill" className="text-emerald-500 shrink-0 mt-0.5" />
+                <span>Zero execution overhead: safe for proprietary and private repos.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Layers 2 & 3: CI/CD & Infra (5-col stacked cards) */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            
+            {/* Layer 2: CI/CD */}
+            <div className="glass-card p-6 sm:p-7 rounded-3xl border-l-4 border-l-amber-500 flex flex-col justify-between gap-4 flex-1">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                    Layer 2: CI/CD Pipeline
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                    <Lightning size={18} weight="duotone" />
+                  </div>
+                </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Runner Matrix & Wattage Profiling
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                  Evaluates GitHub Actions workflow matrix runs, runner hardware wattage (Ubuntu vs macOS vs Windows), and missing cache build penalties.
+                </p>
+              </div>
+            </div>
+
+            {/* Layer 3: Infra */}
+            <div className="glass-card p-6 sm:p-7 rounded-3xl border-l-4 border-l-sky-500 flex flex-col justify-between gap-4 flex-1">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
+                    Layer 3: Infrastructure
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500">
+                    <HardDrives size={18} weight="duotone" />
+                  </div>
+                </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Cloud Grid Intensity & PUE
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                  Parses Terraform and CloudFormation to map deployment regions against real-time grid carbon intensity (g CO2e/kWh) and datacenter PUE.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </motion.section>
+
+      {/* Carbon Scoring Formula Section (Clean Engineering Spec) */}
+      <motion.section className="glass-panel p-6 sm:p-8 rounded-3xl flex flex-col gap-6" {...fadeUpProps}>
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            Carbon Severity Scoring Formulation (0.0 to 10.0)
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
+            The Carbon Severity Index normalizes multi-layer footprints into an engineering-grade 10-point scale for CI status checks and reports.
+          </p>
+        </div>
+
+        {/* Minimalist Formula Display */}
+        <div className="bg-slate-950 text-emerald-400 p-4 sm:p-5 rounded-2xl font-mono text-xs overflow-x-auto border border-white/[0.08] shadow-inner">
+          <span className="text-slate-500 block mb-1">// SCI Formulation Equation</span>
+          <span className="text-emerald-300 font-semibold">
             Total Score = min(10.0, max(0.0, (Code_Carbon / 1000) * 3 + (CI_Carbon / 800) * 2 + (Infra_Carbon / 10000) * 5))
-          </p>
+          </span>
         </div>
 
-        {/* Severity Scale Legend */}
+        {/* Legend */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></div>
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div>
             <div>
-              <span className="text-xs font-bold text-emerald-500 block">Grade A (0.0 - 2.9)</span>
-              <span className="text-[11px] text-slate-600 dark:text-slate-400">Low carbon footprint & optimized code patterns.</span>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">Grade A (0.0 - 2.9)</span>
+              <span className="text-[11px] text-slate-600 dark:text-slate-400">Low carbon footprint with optimal caching.</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-amber-500 shrink-0"></div>
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></div>
             <div>
-              <span className="text-xs font-bold text-amber-500 block">Grade B (3.0 - 5.9)</span>
-              <span className="text-[11px] text-slate-600 dark:text-slate-400">Moderate carbon severity. Caching optimization advised.</span>
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 block">Grade B (3.0 - 5.9)</span>
+              <span className="text-[11px] text-slate-600 dark:text-slate-400">Moderate severity. Caching advisories detected.</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-rose-500 shrink-0"></div>
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></div>
             <div>
-              <span className="text-xs font-bold text-rose-500 block">Grade C (6.0 - 10.0)</span>
-              <span className="text-[11px] text-slate-600 dark:text-slate-400">High carbon severity. Heavy loop nesting or uncached builds.</span>
+              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 block">Grade C (6.0 - 10.0)</span>
+              <span className="text-[11px] text-slate-600 dark:text-slate-400">High severity. Nested loops or dirty grid hubs.</span>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Features Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Features Showcase */}
+      <motion.section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" {...fadeUpProps}>
         
-        <div className="glass-card p-6 rounded-2xl flex flex-col gap-3">
-          <div className="p-2 w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-            <Shield className="w-5 h-5" />
+        {/* Featured Left Card */}
+        <div className="lg:col-span-6 glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-between gap-5 border-l-4 border-l-emerald-500">
+          <div className="flex flex-col gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center">
+              <ShieldCheck size={20} weight="duotone" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Privacy-First Local LLM Reasoning</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Optimization recommendations are generated locally via Ollama with zero source code sent to third-party cloud APIs. Your code never leaves your perimeter.
+            </p>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Privacy-First Local LLM</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Recommendations are generated locally via Ollama (<code className="font-mono text-[11px]">qwen2.5-coder:1.5b</code>) with **zero code leakage** to external endpoints.
-          </p>
+          <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 self-start">
+            <TerminalWindow size={14} weight="bold" />
+            <span>qwen2.5-coder:1.5b</span>
+          </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl flex flex-col gap-3">
-          <div className="p-2 w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center">
-            <GitPullRequest className="w-5 h-5" />
+        {/* Stacked Right Column */}
+        <div className="lg:col-span-6 flex flex-col gap-6">
+          <div className="glass-card p-6 rounded-3xl flex flex-col gap-2 flex-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-500 flex items-center justify-center">
+                <GitPullRequest size={16} weight="bold" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Pull Request Carbon Diff Automation</h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Posts automated PR comments evaluating carbon deltas between base and head branches, alerting engineers when regressions occur.
+            </p>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">GitHub Action PR Diff</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Automatically posts PR comments comparing base vs head branch carbon delta, warning developers if carbon score exceeds threshold.
-          </p>
+
+          <div className="glass-card p-6 rounded-3xl flex flex-col gap-2 flex-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center">
+                <Database size={16} weight="bold" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">TimescaleDB Telemetry Caching</h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Sub-second cached response times for package registry weights and regional grid coefficients ensure zero developer wait time.
+            </p>
+          </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl flex flex-col gap-3">
-          <div className="p-2 w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
-            <Database className="w-5 h-5" />
-          </div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">TimescaleDB Caching</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            PostgreSQL-backed cache for PyPI, npm, Maven, and RubyGems package sizes ensure sub-second repo audit times.
-          </p>
-        </div>
-
-      </section>
+      </motion.section>
 
       {/* Bottom CTA Banner */}
-      <section className="glass-panel-accent p-8 md:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
+      <motion.section className="glass-panel-accent p-8 md:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden" {...fadeUpProps}>
         <div className="flex flex-col gap-2 max-w-xl text-center md:text-left">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-            Ready to Audit your Repository?
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Ready to audit your repository?
           </h2>
           <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            Paste any public GitHub repository URL to compute its instant carbon severity score and receiving actionable GreenOps recommendations.
+            Enter any public GitHub repository URL or connect your private account to compute instant carbon severity scores and receive actionable GreenOps recommendations.
           </p>
         </div>
 
         <button
           onClick={onGoToDashboard}
-          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold px-8 py-4 rounded-2xl transition duration-200 flex items-center justify-center gap-3 text-sm cursor-pointer shadow-lg shadow-emerald-500/30 shrink-0 group active:scale-95"
+          className="btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-7 py-3.5 rounded-xl flex items-center justify-center gap-2.5 text-sm cursor-pointer shadow-lg shadow-emerald-500/25 shrink-0 group"
         >
-          <Play className="w-4 h-4 fill-slate-950 text-slate-950" />
+          <Play size={15} weight="fill" className="text-slate-950" />
           <span>Go to Dashboard</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight size={15} weight="bold" className="group-hover:translate-x-1 transition-transform" />
         </button>
-      </section>
+      </motion.section>
 
     </div>
   );
