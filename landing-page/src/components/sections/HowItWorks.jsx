@@ -100,7 +100,7 @@ export function HowItWorks() {
           </div>
 
           {/* Right Column: CleanShot-style Dynamic Interactive Preview Window */}
-          <div className="lg:col-span-7 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-300 p-6 shadow-2xl min-h-[380px] flex flex-col justify-between">
+          <div className="lg:col-span-7 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-300 p-6 shadow-2xl min-h-95 flex flex-col justify-between">
             {/* Window Chrome Header */}
             <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
               <div className="flex items-center gap-2">

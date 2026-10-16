@@ -7,7 +7,7 @@ export function FinalCta() {
         {/* CleanShot-style Radiant Deep Dark Aurora Card */}
         <div className="relative rounded-3xl aurora-mesh border border-zinc-800 p-8 sm:p-14 lg:p-20 text-center overflow-hidden shadow-2xl">
           {/* Subtle Ambient Radial Lighting */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-500/10 blur-3xl pointer-events-none rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-75 bg-emerald-500/10 blur-3xl pointer-events-none rounded-full" />
 
           <div className="relative z-10 max-w-3xl mx-auto space-y-6">
             {/* Glowing Brand Badge */}

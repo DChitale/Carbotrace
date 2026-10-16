@@ -1,4 +1,5 @@
 import { ThemeProvider } from './context/ThemeContext';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/layout/Header';
 import { Hero } from './components/sections/Hero';
 import { SocialProof } from './components/sections/SocialProof';
@@ -13,6 +14,8 @@ export function App() {
   return (
     <ThemeProvider>
       <div className="min-h-screen flex flex-col bg-[#fafafa] dark:bg-[#09090b] text-[#09090b] dark:text-[#fafafa] font-sans antialiased selection:bg-emerald-500/20 selection:text-emerald-900 dark:selection:text-emerald-200 transition-colors duration-200">
+        <Analytics />
+
         {/* 1. Header (Sticky Glassmorphic Nav) */}
         <Header />
 

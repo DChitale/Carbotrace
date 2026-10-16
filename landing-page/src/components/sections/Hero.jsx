@@ -32,7 +32,7 @@ export function Hero() {
   return (
     <section className="relative pt-20 md:pt-24 pb-16 md:pb-24 overflow-hidden" aria-label="Hero showcase">
       {/* Background ambient lighting */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[360px] bg-gradient-to-b from-emerald-100/50 dark:from-emerald-950/25 via-zinc-100/30 dark:via-zinc-900/20 to-transparent blur-3xl -z-10 pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-90 bg-linear-to-b from-emerald-100/50 dark:from-emerald-950/25 via-zinc-100/30 dark:via-zinc-900/20 to-transparent blur-3xl -z-10 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Hero Text Stack (Max 4 Text Elements per design guidelines) */}
@@ -48,7 +48,7 @@ export function Hero() {
           {/* 2. Main Headline (Max 2 lines) */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-950 dark:text-white leading-[1.12] mb-5">
             Stop software carbon debt <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
               before it reaches production.
             </span>
           </h1>
@@ -196,7 +196,7 @@ export function Hero() {
                   <div>&#125;;</div>
 
                   {/* Remediation Patch from Local Ollama */}
-                  <div className="mt-4 pt-3 border-t border-zinc-800 flex items-start gap-2.5 text-xs text-emerald-300 bg-emerald-950/30 p-2.5 rounded-lg border border-emerald-800/50">
+                  <div className="mt-4 p-2.5 rounded-lg border border-emerald-800/50 bg-emerald-950/30 flex items-start gap-2.5 text-xs text-emerald-300">
                     <Sparkle size={16} weight="fill" className="text-emerald-400 shrink-0 mt-0.5" />
                     <div>
                       <div className="font-semibold text-emerald-200">Local AI Recommendation (qwen2.5-coder):</div>
