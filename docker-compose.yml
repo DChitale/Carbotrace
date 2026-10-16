@@ -30,8 +30,7 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/carbotrace
       - SYNC_DATABASE_URL=postgresql://postgres:postgres@db:5432/carbotrace
       - TEMP_CLONE_DIR=/app/backend/temp_repos
-      - OLLAMA_HOST=http://host.docker.internal:11434
-      - OLLAMA_MODEL=qwen2.5-coder:3b
+      # LLM settings (Ollama Cloud model/key) come from the mounted /app/.env file,
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
