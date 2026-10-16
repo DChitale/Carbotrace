@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { LandingHero } from '../components/landing/LandingHero';
-import { EcosystemStrip } from '../components/landing/EcosystemStrip';
-import { BentoFeatures } from '../components/landing/BentoFeatures';
-import { ImpactCalculator } from '../components/landing/ImpactCalculator';
-import { WorkflowSteps } from '../components/landing/WorkflowSteps';
-import { LandingCta } from '../components/landing/LandingCta';
+import { RepoSearchBar } from '../components/repo/RepoSearchBar';
 import { RepoCard } from '../components/repo/RepoCard';
 import { RepoSelector } from '../components/github/RepoSelector';
 import { EmptyState } from '../components/shared/EmptyState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { CardGridSkeleton } from '../components/shared/LoadingState';
-import { ClockCounterClockwise, Leaf, ArrowRight } from '@phosphor-icons/react';
+import { ClockCounterClockwise, Leaf, ArrowRight, Sparkle, GitBranch } from '@phosphor-icons/react';
 
 export function HomePage({ onOpenGithubModal, githubAuth }) {
   const navigate = useNavigate();
@@ -63,19 +58,72 @@ export function HomePage({ onOpenGithubModal, githubAuth }) {
     }
   };
 
+  const sampleRepos = [
+    'https://github.com/expressjs/express',
+    'https://github.com/pallets/flask',
+    'https://github.com/tiangolo/fastapi',
+  ];
+
   return (
-    <div className="landing-page-wrapper">
-      {/* 1. Viewport-Fitted Hero with Interactive Preview */}
-      <LandingHero
-        onAnalyze={handleAnalyze}
-        loading={analyzing}
-        onOpenGithubModal={onOpenGithubModal}
-        isAuthenticated={githubAuth?.isAuthenticated}
-      />
+    <div style={{ maxWidth: '1180px', margin: '0 auto', padding: 'var(--space-8) var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+      {/* Search Header Banner */}
+      <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: 'var(--radius-pill)', backgroundColor: 'var(--accent-subtle)', border: '1px solid var(--accent-border)', color: 'var(--accent)', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)' }}>
+          <Sparkle size={13} weight="fill" />
+          <span>Software Carbon Intelligence Platform</span>
+        </div>
+
+        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+          Audit GitHub Repositories
+        </h1>
+
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+          Scan AST source code, CI/CD runner pipelines, and regional cloud infrastructure for software carbon debt.
+        </p>
+
+        {/* Repository Search Bar */}
+        <div style={{ width: '100%', marginTop: 'var(--space-4)' }}>
+          <RepoSearchBar
+            onAnalyze={handleAnalyze}
+            loading={analyzing}
+            onOpenGithubModal={onOpenGithubModal}
+            isAuthenticated={githubAuth?.isAuthenticated}
+          />
+        </div>
+
+        {/* Quick Sample Picks */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginTop: 'var(--space-2)' }}>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>Examples:</span>
+          {sampleRepos.map((repo) => {
+            const shortName = repo.replace('https://github.com/', '');
+            return (
+              <button
+                key={repo}
+                type="button"
+                onClick={() => handleAnalyze({ repoUrl: repo, includeLlm: true })}
+                disabled={analyzing}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-secondary)',
+                  borderRadius: 'var(--radius-pill)',
+                  padding: '2px 10px',
+                  fontSize: 'var(--text-xs)',
+                  fontFamily: 'var(--font-mono)',
+                  cursor: analyzing ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {shortName}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Analysis Error Toast/Banner if analysis fails */}
       {analysisError && (
-        <div className="landing-error-container">
+        <div style={{ width: '100%' }}>
           <ErrorState
             title="Analysis Failed"
             message={analysisError.message}
@@ -87,7 +135,7 @@ export function HomePage({ onOpenGithubModal, githubAuth }) {
 
       {/* GitHub user repo quick picker if authenticated */}
       {githubAuth?.isAuthenticated && githubAuth?.token && (
-        <div className="landing-authenticated-picker">
+        <div style={{ width: '100%' }}>
           <RepoSelector
             token={githubAuth.token}
             onSelectRepo={(url) => handleAnalyze({ repoUrl: url, includeLlm: true })}
@@ -95,19 +143,7 @@ export function HomePage({ onOpenGithubModal, githubAuth }) {
         </div>
       )}
 
-      {/* 2. Ecosystem & Tooling Logo Wall */}
-      <EcosystemStrip />
-
-      {/* 3. 5-Cell Rhythmic Bento Grid */}
-      <BentoFeatures />
-
-      {/* 4. Interactive Keynote Carbon Impact Calculator */}
-      <ImpactCalculator />
-
-      {/* 5. 3-Step Frictionless Developer Workflow */}
-      <WorkflowSteps />
-
-      {/* 6. Live Community Analyses (Database Feed) */}
+      {/* Live Community Analyses (Database Feed) */}
       <section className="landing-recent-section" aria-label="Recent audits">
         <div className="recent-header-row">
           <div className="recent-header-title">
@@ -147,9 +183,6 @@ export function HomePage({ onOpenGithubModal, githubAuth }) {
           </div>
         )}
       </section>
-
-      {/* 7. Final High-Contrast Keynote Call-To-Action */}
-      <LandingCta onAnalyze={handleAnalyze} loading={analyzing} />
     </div>
   );
 }

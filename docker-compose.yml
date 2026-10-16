@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   db:
     image: timescale/timescaledb:latest-pg16
     container_name: carbotrace-db
     ports:
-      - "5432:5432"
+      - "15432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -24,7 +22,7 @@ services:
       dockerfile: Dockerfile.backend
     container_name: carbotrace-backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend:/app/backend
       - .env:/app/.env
@@ -32,6 +30,10 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/carbotrace
       - SYNC_DATABASE_URL=postgresql://postgres:postgres@db:5432/carbotrace
       - TEMP_CLONE_DIR=/app/backend/temp_repos
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_MODEL=qwen2.5-coder:3b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

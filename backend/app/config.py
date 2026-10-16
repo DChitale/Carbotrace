@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     
     # LLM Settings
     OLLAMA_HOST: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "qwen2.5-coder:1.5b"
+    OLLAMA_MODEL: str = "qwen2.5-coder:3b"
 
     # AWS configuration for Cost Explorer
     AWS_ACCESS_KEY_ID: Optional[str] = None
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env.local", ".env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )

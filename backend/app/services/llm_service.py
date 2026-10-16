@@ -166,8 +166,9 @@ async def generate_recommendations(analysis_results: Dict[str, Any]) -> List[Dic
     }
     
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload, timeout=10) as response:
+        timeout = aiohttp.ClientTimeout(total=45)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, json=payload) as response:
                 if response.status == 200:
                     result = await response.json()
                     response_text = result.get("response", "").strip()
@@ -178,10 +179,16 @@ async def generate_recommendations(analysis_results: Dict[str, Any]) -> List[Dic
                     elif "```" in response_text:
                         response_text = response_text.split("```")[1].strip()
                         
-                    recs = json.loads(response_text)
-                    if isinstance(recs, list) and len(recs) > 0:
+                    parsed = json.loads(response_text)
+                    recs = []
+                    if isinstance(parsed, list):
+                        recs = parsed
+                    elif isinstance(parsed, dict) and "recommendations" in parsed and isinstance(parsed["recommendations"], list):
+                        recs = parsed["recommendations"]
+
+                    if len(recs) > 0:
                         _llm_cache[input_hash] = recs
-                        logger.info("Successfully generated recommendations from Ollama LLM.")
+                        logger.info(f"Successfully generated {len(recs)} recommendations from Ollama LLM.")
                         return recs
     except Exception as e:
         logger.warning(f"Ollama recommendation generation failed: {e}. Falling back to rule-based engine.")
@@ -190,3 +197,4 @@ async def generate_recommendations(analysis_results: Dict[str, Any]) -> List[Dic
     recs = generate_static_recommendations(analysis_results)
     _llm_cache[input_hash] = recs
     return recs
+
