@@ -40,7 +40,7 @@ flowchart LR
 ## Features
 
 - **Automated Repository Audit** — Analyze any public GitHub repository via URL to produce a comprehensive sustainability scorecard.
-- **Local AI Remediation** — Generates actionable optimization patches using local Ollama models (`qwen2.5-coder:1.5b`) with zero proprietary code transmission.
+- **Local AI Remediation** — Generates actionable optimization patches using local Ollama models (`qwen2.5-coder:3b`) with zero proprietary code transmission.
 - **Pull Request Merge Gate** — GitHub Action integration posts carbon delta diffs on pull requests and blocks merges exceeding defined emission thresholds.
 - **Global Grid Telemetry** — Interactive map tracking regional data center carbon intensity and renewable energy distribution.
 - **Package Metadata Cache** — Persistent cache for PyPI, npm, Maven, and RubyGems dependency weight metrics.
@@ -57,8 +57,8 @@ Run the backend and database services together:
 docker-compose up --build
 ```
 
-- API Server: `http://localhost:8000`
-- API Documentation: `http://localhost:8000/docs`
+- API Server: `http://localhost:8001`
+- API Documentation: `http://localhost:8001/docs`
 
 ---
 
@@ -100,7 +100,7 @@ The web dashboard runs at `http://localhost:5173`.
 For local AI recommendations, install [Ollama](https://ollama.com/) and load the coding model:
 
 ```bash
-ollama pull qwen2.5-coder:1.5b
+ollama pull qwen2.5-coder:3b
 ollama serve
 ```
 
@@ -114,7 +114,7 @@ Copy `.env.example` to `.env` in the project root:
 |---|---|---|
 | `DATABASE_URL` | `postgresql+asyncpg://postgres:postgres@localhost:5432/carbotrace` | Async database connection string |
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama service endpoint |
-| `OLLAMA_MODEL` | `qwen2.5-coder:1.5b` | LLM model identifier |
+| `OLLAMA_MODEL` | `qwen2.5-coder:3b` | LLM model identifier |
 | `GITHUB_TOKEN` | *(Optional)* | Personal access token for higher GitHub API rate limits |
 | `ELECTRICITY_MAPS_API_KEY` | *(Optional)* | API key for live grid carbon intensity |
 | `AWS_ACCESS_KEY_ID` | *(Optional)* | AWS credentials for Cost Explorer integration |
