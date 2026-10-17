@@ -155,9 +155,10 @@ async def generate_recommendations(analysis_results: Dict[str, Any]) -> List[Dic
     Output valid JSON only. Do not wrap in markdown tags or include conversational text.
     """
     
-    url = f"{settings.OLLAMA_HOST}/api/generate"
+    # Priority: local Ollama first, then Ollama Cloud, then static rules.
+    url = f"{settings.OLLAMA_LOCAL_HOST}/api/generate"
     payload = {
-        "model": settings.OLLAMA_MODEL,
+        "model": settings.OLLAMA_LOCAL_MODEL,
         "prompt": prompt,
         "stream": False,
         "options": {
@@ -191,9 +192,48 @@ async def generate_recommendations(analysis_results: Dict[str, Any]) -> List[Dic
                         logger.info(f"Successfully generated {len(recs)} recommendations from Ollama LLM.")
                         return recs
     except Exception as e:
-        logger.warning(f"Ollama recommendation generation failed: {e}. Falling back to rule-based engine.")
+        logger.warning(f"Local Ollama recommendation generation failed: {e}. Trying Ollama Cloud.")
 
-    # Static fallback
+    # Step 2: Ollama Cloud (OpenAI-compatible /v1 API) when an API key is configured.
+    if settings.OLLAMA_API_KEY:
+        try:
+            cloud_url = f"{settings.OLLAMA_HOST.rstrip('/')}/v1/chat/completions"
+            cloud_headers = {"Authorization": f"Bearer {settings.OLLAMA_API_KEY}"}
+            cloud_payload = {
+                "model": settings.OLLAMA_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.2,
+            }
+            timeout = aiohttp.ClientTimeout(total=60)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(cloud_url, json=cloud_payload, headers=cloud_headers) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        response_text = result["choices"][0]["message"]["content"].strip()
+
+                        # Clean up JSON wrappers if LLM returned them
+                        if "```json" in response_text:
+                            response_text = response_text.split("```json")[1].split("```")[0].strip()
+                        elif "```" in response_text:
+                            response_text = response_text.split("```")[1].strip()
+
+                        parsed = json.loads(response_text)
+                        recs = []
+                        if isinstance(parsed, list):
+                            recs = parsed
+                        elif isinstance(parsed, dict) and "recommendations" in parsed and isinstance(parsed["recommendations"], list):
+                            recs = parsed["recommendations"]
+
+                        if len(recs) > 0:
+                            _llm_cache[input_hash] = recs
+                            logger.info(f"Successfully generated {len(recs)} recommendations from Ollama Cloud.")
+                            return recs
+                    else:
+                        logger.warning(f"Ollama Cloud returned status {response.status}. Falling back to static engine.")
+        except Exception as e:
+            logger.warning(f"Ollama Cloud recommendation generation failed: {e}. Falling back to static engine.")
+
+    # Step 3: Static fallback
     recs = generate_static_recommendations(analysis_results)
     _llm_cache[input_hash] = recs
     return recs

@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     # LLM Settings
     OLLAMA_HOST: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "qwen2.5-coder:3b"
+    OLLAMA_API_KEY: Optional[str] = None
+    # Local Ollama fallback (tried first, before cloud)
+    OLLAMA_LOCAL_HOST: str = "http://localhost:11434"
+    OLLAMA_LOCAL_MODEL: str = "qwen2.5-coder:3b"
 
     # AWS configuration for Cost Explorer
     AWS_ACCESS_KEY_ID: Optional[str] = None
