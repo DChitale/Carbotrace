@@ -1,10 +1,10 @@
-# 🚀 How to Run Carbotrace — Step-by-Step Guide
+# How to Run Carbotrace — Step-by-Step Guide
 
 This document provides complete instructions on how to set up, run, test, and troubleshoot **Carbotrace** on your local machine.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 1. [Prerequisites](#-prerequisites)
 2. [Method 1: One-Click Docker Compose (Easiest)](#method-1-one-click-docker-compose-easiest)
 3. [Method 2: Manual Local Development Setup](#method-2-manual-local-development-setup)
@@ -18,7 +18,7 @@ This document provides complete instructions on how to set up, run, test, and tr
 
 ---
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 Before getting started, make sure you have the following installed on your system:
 
@@ -69,13 +69,13 @@ docker run -d `
   timescale/timescaledb:latest-pg16
 ```
 
-> 💡 **Tip:** If port 5432 is already used by a local PostgreSQL installation, stop your local PostgreSQL service or change the port mapping (e.g. `-p 5433:5432`).
+> **Tip:** If port 5432 is already used by a local PostgreSQL installation, stop your local PostgreSQL service or change the port mapping (e.g. `-p 5433:5432`).
 
 ---
 
 ### Step 2: Start Backend (FastAPI)
 
-> ⚡ **Windows One-Click Shortcut:**
+> **Windows One-Click Shortcut:**
 > Double-click **`run_backend.bat`** (or in PowerShell type `.\run_backend.bat` / `.\run_backend.ps1`) for backend only. It automatically detects your virtual environment, frees port `8001`, verifies Docker database status, and launches Uvicorn.
 > Or double-click **`run_all.bat`** (or in PowerShell type `.\run_all.bat` / `.\run_all.ps1`) to automatically free ports 8001 & 5173, start TimescaleDB container, and boot both FastAPI and Vite services together!
 
@@ -97,7 +97,7 @@ Alternatively, start manually step-by-step:
    *(If creating fresh: `python -m venv backend\.venv` followed by `pip install -r requirements.txt`)*
 
 3. Set the `PYTHONPATH` environment variable:
-   > ⚠️ **Important:** Required so Python can resolve the `backend.app` module namespace cleanly.
+   > **Important:** Required so Python can resolve the `backend.app` module namespace cleanly.
    ```powershell
    $env:PYTHONPATH="d:\Projects\Carbotrace"
    ```
@@ -108,7 +108,7 @@ Alternatively, start manually step-by-step:
    ```
 
 5. Run the FastAPI development server:
-   > ⚠️ **Important:** Always include `--reload-dir backend/app` when using `--reload`. This prevents Uvicorn's file watcher from triggering unwanted server reloads when git repositories are cloned to `backend/temp_repos/` during analysis.
+   > **Important:** Always include `--reload-dir backend/app` when using `--reload`. This prevents Uvicorn's file watcher from triggering unwanted server reloads when git repositories are cloned to `backend/temp_repos/` during analysis.
    ```powershell
    backend\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --reload --reload-dir backend/app --host 0.0.0.0 --port 8001
    ```
@@ -161,7 +161,7 @@ To enable AI recommendations locally:
 
 ---
 
-## 🔍 Verifying Everything Works
+## Verifying Everything Works
 
 ### 1. Check Backend Health
 Open `http://localhost:8001/api/health` in your browser. You should see:
@@ -189,7 +189,7 @@ $env:PYTHONPATH="d:\Projects\Carbotrace"
 
 ---
 
-## 🔀 How to Check PR Carbon Results
+## How to Check PR Carbon Results
 
 Carbotrace provides three ways to check Pull Request (PR) carbon audit results:
 
@@ -198,9 +198,9 @@ Carbotrace provides three ways to check Pull Request (PR) carbon audit results:
 When you add the Carbotrace GitHub Action to your repository (`.github/workflows/carbotrace.yml`), it automatically analyzes both the **base branch (e.g. `main`)** and **head branch (your PR)** on every push, posting a comparison comment directly on your PR:
 
 ```markdown
-## 🌱 Carbotrace Carbon Audit Diff
+## Carbotrace Carbon Audit Diff
 
-> ⚠️ **WARNING:** This PR increases carbon severity score by **+0.26 points**, exceeding threshold of **0.1**!
+> **WARNING:** This PR increases carbon severity score by **+0.26 points**, exceeding threshold of **0.1**!
 
 | Layer | Base (main) | Head (feature-branch) | Delta |
 |-------|-------------|-----------------------|-------|
@@ -262,7 +262,7 @@ curl -X POST "http://localhost:8001/api/analyze-repo" \
 
 ---
 
-## ⚙️ Environment Variables Reference
+## Environment Variables Reference
 
 A default `.env` file is provided in the project root. Key options:
 
@@ -277,7 +277,7 @@ A default `.env` file is provided in the project root. Key options:
 
 ---
 
-## ❓ Troubleshooting & Common Issues
+## Troubleshooting & Common Issues
 
 ### Issue 1: `ModuleNotFoundError: No module named 'backend'`
 - **Fix:** Make sure to set `PYTHONPATH` before running `uvicorn` or `pytest`:
