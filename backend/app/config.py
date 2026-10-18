@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # Note: TimescaleDB is just PostgreSQL with an extension.
     # Default local dev values point to host "db" (for docker-compose) or "localhost" (for local running)
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/carbotrace"
-    SYNC_DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/carbotrace"
+    SYNC_DATABASE_URL: str = "postgresql+psycopg2://postgres:postgres@localhost:5432/carbotrace"
 
     # External integrations
     GITHUB_TOKEN: Optional[str] = None
