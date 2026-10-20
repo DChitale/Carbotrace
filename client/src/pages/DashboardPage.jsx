@@ -308,13 +308,21 @@ export function DashboardPage({ githubAuth }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
                 <Sparkle size={18} color="var(--accent)" weight="fill" />
                 <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>
-                  Actionable Insights
+                  AI Insights
                 </h3>
               </div>
               <span className="badge badge-emerald">
                 {recommendations.length} recommendations
               </span>
             </div>
+
+            {recommendations.length > 0 && (
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-1)', marginLeft: 'var(--space-2)' }}>
+                {recommendations.some((r) => r.source === 'ollama_local' || r.source === 'ollama_cloud')
+                  ? 'Powered by local AI (Ollama)'
+                  : 'Rule-based static insights (Ollama unavailable)'}
+              </div>
+            )}
 
             {recommendations.length === 0 ? (
               <div style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)', padding: 'var(--space-3) 0' }}>

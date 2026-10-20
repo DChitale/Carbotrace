@@ -51,6 +51,7 @@ class RecommendationItem(BaseModel):
     savings_percent: float
     effort: str
     priority: str
+    source: str  # ollama_local | ollama_cloud | static_rules
 
 
 class LayerBreakdown(BaseModel):
