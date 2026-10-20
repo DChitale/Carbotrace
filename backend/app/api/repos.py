@@ -47,8 +47,8 @@ async def list_repositories(
 
         return response
     except Exception as e:
-        logger.warning(f"Database query failed in list_repositories (is database running?): {e}")
-        return []
+        logger.error(f"Database query failed in list_repositories: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to load repository history: {str(e)}")
 
 
 @router.get("/repos/{repo_id}", response_model=RepoResponse)

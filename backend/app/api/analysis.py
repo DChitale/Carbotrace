@@ -214,7 +214,8 @@ async def analyze_repo(
             description=rec["description"],
             savings_percent=rec["savings_percent"],
             effort=rec["effort"],
-            priority=rec["priority"]
+            priority=rec["priority"],
+            source=rec.get("source", "static_rules"),
         )
         db.add(db_rec)
         recommendations.append(db_rec)
@@ -242,7 +243,8 @@ async def analyze_repo(
                 "description": r.description,
                 "savings_percent": r.savings_percent,
                 "effort": r.effort,
-                "priority": r.priority
+                "priority": r.priority,
+                "source": r.source,
             } for r in recommendations
         ]
     }

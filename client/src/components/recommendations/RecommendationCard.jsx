@@ -11,6 +11,7 @@ export function RecommendationCard({ recommendation }) {
     savings_percent = 0,
     effort = 'MEDIUM',
     priority = 'MEDIUM',
+    source = 'static_rules',
   } = recommendation;
 
   const prio = (priority || 'MEDIUM').toUpperCase();
@@ -98,7 +99,10 @@ export function RecommendationCard({ recommendation }) {
           marginTop: 'var(--space-1)',
         }}
       >
-        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Priority:</span>
+        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Source:</span>
+        <StatusBadge type="source" value={source} size="xs" />
+
+        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: 'var(--space-2)' }}>Priority:</span>
         <StatusBadge type="priority" value={priority} size="xs" />
 
         <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginLeft: 'var(--space-2)' }}>Effort:</span>

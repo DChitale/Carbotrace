@@ -13,6 +13,7 @@ class Recommendation(Base):
     savings_percent = Column(Float, nullable=False)
     effort = Column(String, nullable=False)      # e.g., "LOW", "MEDIUM", "HIGH"
     priority = Column(String, nullable=False)    # e.g., "LOW", "MEDIUM", "HIGH"
+    source = Column(String, nullable=False, default="static_rules")  # ollama_local | ollama_cloud | static_rules
 
     # Relationships
     analysis = relationship("Analysis", back_populates="recommendations")

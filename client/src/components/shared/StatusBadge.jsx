@@ -25,6 +25,10 @@ export function StatusBadge({ type = 'severity', value = '', size = 'sm' }) {
     if (normalized === 'CODE') colorClass = 'badge-emerald';
     else if (normalized === 'CI') colorClass = 'badge-blue';
     else colorClass = 'badge-zinc';
+  } else if (type === 'source') {
+    if (normalized === 'OLLAMA_LOCAL' || normalized === 'OLLAMA_CLOUD') colorClass = 'badge-emerald';
+    else if (normalized === 'STATIC_RULES') colorClass = 'badge-zinc';
+    else colorClass = 'badge-zinc';
   }
 
   return (
