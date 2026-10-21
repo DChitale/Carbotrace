@@ -1683,14 +1683,16 @@ const Engine = memo(function Engine({ open, onToggle, onSelect, selected, reduce
         const p = iso(320 + a.dx, a.dy, a.z);
         const outward = [p[0] - core[0], p[1] - core[1]];
         const len = Math.hypot(outward[0], outward[1]) || 1;
-        const ox = (outward[0] / len) * 34;
-        const oy = (outward[1] / len) * 34 - 10;
         const lx = p[0] + a.label[0];
         const ly = p[1] + a.label[1];
         const bx = 320 + a.dx - 44;
         const isSelected = selected === a.id;
         const isHovered = hovered === a.id;
         const dim = Boolean(selected) && !isSelected;
+        const spread = open || isSelected ? 34 : 12;
+        const lift = open || isSelected ? 10 : 4;
+        const ox = (outward[0] / len) * spread;
+        const oy = (outward[1] / len) * spread - lift;
         return (
           <motion.g
             key={a.id}
