@@ -1646,7 +1646,10 @@ const Engine = memo(function Engine({ open, onToggle, onSelect, selected, reduce
           setHover(true);
           setHovered('core');
         }}
-        onBlur={() => setHovered((cur) => (cur === 'core' ? null : cur))}
+        onBlur={(event) => {
+          setHovered((cur) => (cur === 'core' ? null : cur));
+          if (!event.currentTarget.ownerSVGElement?.contains(event.relatedTarget)) setHover(false);
+        }}
       >
         <Disc cx={320} cy={0} z={40} r={54} h={7} tone="mid" />
         <Disc cx={320} cy={0} z={47} r={44} h={38} tone="base" />
@@ -1712,7 +1715,10 @@ const Engine = memo(function Engine({ open, onToggle, onSelect, selected, reduce
               setHover(true);
               setHovered(a.id);
             }}
-            onBlur={() => setHovered((cur) => (cur === a.id ? null : cur))}
+            onBlur={(event) => {
+              setHovered((cur) => (cur === a.id ? null : cur));
+              if (!event.currentTarget.ownerSVGElement?.contains(event.relatedTarget)) setHover(false);
+            }}
             animate={{ x: exploded ? ox : 0, y: (exploded ? oy : 0) - (isSelected ? 6 : 0) }}
             transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 150, damping: 20, delay: i * 0.012 }}
           >
@@ -2044,6 +2050,7 @@ function AssemblyInspector({ assembly, onClose, reduce }) {
       transition={reduce ? { duration: 0 } : { duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
       className="mb-3 border p-3"
       style={{ borderColor: 'var(--accent)', background: 'var(--panel)' }}
+      aria-live="polite"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
