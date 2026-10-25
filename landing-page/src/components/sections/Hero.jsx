@@ -2548,6 +2548,7 @@ export function Hero() {
                   className="ctv-mono flex items-center gap-1 border px-1.5 py-1 text-[7px] tracking-[.12em] transition-colors hover:border-[var(--ink)]"
                   style={{ borderColor: 'var(--rule)', color: 'var(--muted)' }}
                   aria-label="Start over from chapter 1"
+                  title="Start over from chapter 1"
                 >
                   <ArrowCounterClockwise size={10} weight="bold" />
                   <span className="hidden sm:inline">START OVER</span>
