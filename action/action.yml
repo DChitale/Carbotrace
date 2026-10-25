@@ -8,7 +8,7 @@ inputs:
   carbotrace-url:
     description: 'Carbotrace API endpoint (e.g. http://carbotrace.company.com/api)'
     required: false
-    default: 'https://jh6npx1l-8001.inc1.devtunnels.ms/api'
+    default: 'https://carbotrace-backend.onrender.com/api'
   threshold:
     description: 'Score delta threshold to warn user (e.g. 0.2)'
     required: false
@@ -19,7 +19,7 @@ runs:
     - name: Audit PR Carbon Delta
       shell: bash
       run: |
-        echo "🌱 Starting Carbotrace carbon delta audit..."
+        echo "Starting Carbotrace carbon delta audit..."
         
         REPO_URL="https://github.com/${{ github.repository }}"
         BASE_REF="${{ github.base_ref }}"
@@ -82,7 +82,7 @@ runs:
           WARNING_BANNER="> ⚠️ **WARNING:** This PR increases carbon severity score by **+$DELTA_SCORE points**, exceeding configured threshold of **$THRESHOLD**!"
         fi
 
-        COMMENT_BODY="## 🌱 Carbotrace Carbon Audit Diff
+        COMMENT_BODY="## Carbotrace Carbon Audit Diff
 
         $WARNING_BANNER
 
