@@ -62,7 +62,7 @@ const STORY = [
     kicker: 'GitHub Actions · ubuntu-latest',
     title: ['Every PR rebuilds', 'the matrix.'],
     body:
-      'A cold GitHub Actions runner rebuilds 14 jobs and misses six caches. The first watt is spent before the code executes.',
+      'A cold GitHub Actions runner rebuilds 14 jobs. The first watt is spent before the code executes.',
     facts: [
       ['MATRIX', '14 jobs'],
       ['CACHE', '6 misses'],
@@ -1689,6 +1689,7 @@ const Engine = memo(function Engine({ open, onToggle, onSelect, selected, reduce
         const lx = p[0] + a.label[0];
         const ly = p[1] + a.label[1];
         const bx = 320 + a.dx - 44;
+        const inspectable = a.id !== 'cache';
         const isSelected = selected === a.id;
         const isHovered = hovered === a.id;
         const dim = Boolean(selected) && !isSelected;
@@ -1699,13 +1700,13 @@ const Engine = memo(function Engine({ open, onToggle, onSelect, selected, reduce
         return (
           <motion.g
             key={a.id}
-            className="ctv-module"
-            role="button"
-            tabIndex={focusable ? 0 : -1}
-            aria-pressed={isSelected}
-            aria-label={`${a.code} ${a.name}. ${a.desc}`}
-            onClick={pick(a.id)}
-            onKeyDown={keyPick(a.id)}
+            className={inspectable ? 'ctv-module' : undefined}
+            role={inspectable ? 'button' : undefined}
+            tabIndex={inspectable && focusable ? 0 : -1}
+            aria-pressed={inspectable ? isSelected : undefined}
+            aria-label={inspectable ? `${a.code} ${a.name}. ${a.desc}` : undefined}
+            onClick={inspectable ? pick(a.id) : (event) => event.stopPropagation()}
+            onKeyDown={inspectable ? keyPick(a.id) : undefined}
             onPointerEnter={() => {
               setHover(true);
               setHovered(a.id);
@@ -2054,7 +2055,7 @@ function AssemblyInspector({ assembly, onClose, reduce }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="ctv-mono text-[7px] tracking-[.18em]" style={{ color: 'var(--accent)' }}>
+          <div className="ctv-mono text-[8.5px] tracking-[.18em]" style={{ color: 'var(--accent)' }}>
             ASSEMBLY {assembly.code} · INSPECT
           </div>
           <div className="mt-1 truncate text-[17px] leading-tight" style={{ color: 'var(--ink)' }}>
@@ -2075,10 +2076,10 @@ function AssemblyInspector({ assembly, onClose, reduce }) {
         {assembly.desc}
       </p>
       <div className="mt-2.5 flex items-center justify-between gap-2 border-t pt-2" style={{ borderColor: 'var(--rule-soft)' }}>
-        <span className="ctv-mono text-[7px] tracking-[.08em]" style={{ color: 'var(--muted)' }}>
+        <span className="ctv-mono text-[8.5px] tracking-[.08em]" style={{ color: 'var(--muted)' }}>
           {assembly.detail}
         </span>
-        <span className="ctv-mono flex items-center gap-1 text-[7px] tracking-[.1em]" style={{ color: 'var(--green)' }}>
+        <span className="ctv-mono flex items-center gap-1 text-[8.5px] tracking-[.1em]" style={{ color: 'var(--green)' }}>
           <span className="inline-block h-1 w-1 rounded-full" style={{ background: 'var(--green)' }} />
           LINKED
         </span>
@@ -2094,8 +2095,8 @@ function AssemblyHint() {
       style={{ borderColor: 'var(--rule-soft)', background: 'var(--panel)' }}
     >
       <span className="inline-block h-1 w-1 shrink-0 rounded-full" style={{ background: 'var(--accent)' }} />
-      <span className="ctv-mono text-[7px] leading-tight tracking-[.13em]" style={{ color: 'var(--muted)' }}>
-        CLICK ANY BLOCK TO INSPECT · P-01—P-11
+      <span className="ctv-mono text-[8.5px] leading-tight tracking-[.13em]" style={{ color: 'var(--muted)' }}>
+        CLICK A MODULE TO INSPECT · CACHE ANALYZER EXCLUDED
       </span>
     </div>
   );
@@ -2110,7 +2111,7 @@ function ChapterCopy({ chapter, index, reduce, goToChapter, onRestart }) {
       transition={reduce ? { duration: 0 } : { duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
       className="min-h-0"
     >
-      <div className="flex min-w-0 items-center gap-2.5 ctv-mono text-[8.5px] tracking-[.18em] sm:text-[9.5px]">
+      <div className="flex min-w-0 items-center gap-2.5 ctv-mono text-[9px] tracking-[.18em] sm:text-[10.5px]">
         <span className="inline-block h-px w-7 shrink-0" style={{ background: 'var(--accent)' }} />
         <span className="shrink-0" style={{ color: 'var(--accent)' }}>CHAPTER {chapter.id}</span>
         <span className="shrink-0" style={{ color: 'var(--muted)' }}>/ {chapter.tag}</span>
@@ -2130,8 +2131,8 @@ function ChapterCopy({ chapter, index, reduce, goToChapter, onRestart }) {
       <dl className="mt-4 hidden border-t pt-3 sm:grid sm:grid-cols-3 sm:gap-4" style={{ borderColor: 'var(--rule)' }}>
         {chapter.facts.map(([k, v]) => (
           <div key={k}>
-            <dt className="ctv-mono text-[7.5px] tracking-[.16em]" style={{ color: 'var(--muted)' }}>{k}</dt>
-            <dd className="ctv-mono mt-1 text-[9.5px] tracking-[.02em]" style={{ color: 'var(--ink)' }}>{v}</dd>
+            <dt className="ctv-mono text-[8.5px] tracking-[.16em]" style={{ color: 'var(--muted)' }}>{k}</dt>
+            <dd className="ctv-mono mt-1 text-[10px] tracking-[.02em]" style={{ color: 'var(--ink)' }}>{v}</dd>
           </div>
         ))}
       </dl>
@@ -2140,25 +2141,25 @@ function ChapterCopy({ chapter, index, reduce, goToChapter, onRestart }) {
         <div className="mt-4 border p-2.5 sm:p-3" style={{ borderColor: 'var(--rule)', background: 'var(--panel)' }}>
           <div className="flex items-end justify-between gap-3">
             <div>
-              <div className="ctv-mono text-[7px] tracking-[.16em]" style={{ color: 'var(--muted)' }}>BEFORE</div>
+              <div className="ctv-mono text-[8.5px] tracking-[.16em]" style={{ color: 'var(--muted)' }}>BEFORE</div>
               <div className="ctv-num text-[19px] sm:text-[23px]" style={{ color: 'var(--accent)' }}>
                 {fmtNum(chapter.compare.before)}
-                <span className="ctv-mono ml-1 text-[8px]" style={{ color: 'var(--muted)' }}>kg</span>
+                <span className="ctv-mono ml-1 text-[9px]" style={{ color: 'var(--muted)' }}>kg</span>
               </div>
             </div>
             <ArrowRight size={16} weight="bold" style={{ color: 'var(--muted)', marginBottom: 4 }} />
             <div className="text-right">
-              <div className="ctv-mono text-[7px] tracking-[.16em]" style={{ color: 'var(--muted)' }}>AFTER</div>
+              <div className="ctv-mono text-[8.5px] tracking-[.16em]" style={{ color: 'var(--muted)' }}>AFTER</div>
               <div className="ctv-num text-[19px] sm:text-[23px]" style={{ color: 'var(--green)' }}>
                 {fmtNum(chapter.compare.after)}
-                <span className="ctv-mono ml-1 text-[8px]" style={{ color: 'var(--muted)' }}>kg</span>
+                <span className="ctv-mono ml-1 text-[9px]" style={{ color: 'var(--muted)' }}>kg</span>
               </div>
             </div>
           </div>
           <div className="mt-2 h-1.5 w-full" style={{ background: 'var(--rule-soft)' }}>
             <div className="h-full" style={{ width: `${chapter.compare.saved}%`, background: 'var(--green)' }} />
           </div>
-          <div className="mt-1.5 flex items-center justify-between ctv-mono text-[7px] tracking-[.1em]" style={{ color: 'var(--muted)' }}>
+          <div className="mt-1.5 flex items-center justify-between ctv-mono text-[8.5px] tracking-[.1em]" style={{ color: 'var(--muted)' }}>
             <span style={{ color: 'var(--accent)' }}>BLOCKED</span>
             <span style={{ color: 'var(--green)' }}>{chapter.compare.saved}% AVOIDED · MERGED</span>
           </div>
@@ -2196,13 +2197,13 @@ function ChapterCopy({ chapter, index, reduce, goToChapter, onRestart }) {
         <button
           type="button"
           onClick={() => goToChapter(Math.min(index + 1, N - 1))}
-          className="ctv-mono flex items-center gap-2 text-[8px] tracking-[.16em]"
+          className="ctv-mono flex items-center gap-2 text-[9px] tracking-[.16em]"
           style={{ color: 'var(--muted)' }}
         >
           <span>SCROLL TO TRACE</span>
           <span className="inline-block h-px w-8" style={{ background: 'var(--rule)' }} />
         </button>
-        <span className="ctv-mono ml-auto text-[8px] tracking-[.12em]" style={{ color: 'var(--muted)' }}>
+        <span className="ctv-mono ml-auto text-[9px] tracking-[.12em]" style={{ color: 'var(--muted)' }}>
           {chapter.id} / 08
         </span>
       </div>
@@ -2217,9 +2218,6 @@ export function Hero() {
   const sectionRef = useRef(null);
   const cameraRef = useRef(null);
   const counterRef = useRef(null);
-  const auditRef = useRef(null);
-  const auditMetaRef = useRef(null);
-  const auditDotRef = useRef(null);
   const barRef = useRef(null);
   const meterRef = useRef(null);
   const heatRef = useRef(null);
@@ -2314,7 +2312,6 @@ export function Hero() {
   const chapter = STORY[active];
   const sci = chapter.sci;
   const sciValue = ((sci.E * sci.I) + sci.M) / sci.R;
-  const totalLinks = CONNECTORS.filter((c) => c.chapters.includes(active)).length;
 
   useEffect(() => {
     let raf = 0;
@@ -2421,7 +2418,6 @@ export function Hero() {
       const visibleIds = visibleMachineIds(index);
       const allRects = visibleIds.map((id) => machineRect(machineById(id)));
       const activeConns = CONNECTORS.filter((c) => c.chapters.includes(index));
-      let clashes = 0;
 
       for (let ciIndex = 0; ciIndex < activeConns.length; ciIndex++) {
         const c = activeConns[ciIndex];
@@ -2454,7 +2450,6 @@ export function Hero() {
           }
         }
         if (!best) {
-          clashes += 1;
           best = [A, [A[0], Math.min(ra.y, rb.y) - 18], [B[0], Math.min(ra.y, rb.y) - 18], B];
         }
 
@@ -2477,20 +2472,6 @@ export function Hero() {
         }
       }
 
-      const auditOk = clashes === 0;
-      const auditLabel = auditOk ? 'AUDIT PASS' : 'AUDIT HOLD';
-      if (auditRef.current && auditRef.current.textContent !== auditLabel) {
-        auditRef.current.textContent = auditLabel;
-      }
-      if (auditMetaRef.current) {
-        const meta = index === 7
-          ? '11 ASSEMBLIES · 0 CLASH'
-          : `${activeConns.length} LINKS · ${clashes} CLASH`;
-        if (auditMetaRef.current.textContent !== meta) auditMetaRef.current.textContent = meta;
-      }
-      if (auditDotRef.current) {
-        auditDotRef.current.style.background = auditOk ? 'var(--green)' : 'var(--accent)';
-      }
     };
 
     frame();
@@ -2526,11 +2507,11 @@ export function Hero() {
             <div className="flex items-center justify-between gap-3 pb-2 sm:pb-3">
               <div className="flex min-w-0 items-center gap-2.5">
                 <span className="inline-block h-1.5 w-1.5 shrink-0" style={{ background: 'var(--accent)' }} />
-                <span className="ctv-mono truncate text-[8px] tracking-[.2em] sm:text-[9.5px]" style={{ color: 'var(--ink)' }}>
+                <span className="ctv-mono truncate text-[9px] tracking-[.2em] sm:text-[10.5px]" style={{ color: 'var(--ink)' }}>
                   CARBOTRACE / CARBON TRACE
                 </span>
               </div>
-              <div className="ctv-mono hidden items-center gap-2 text-[8px] tracking-[.16em] lg:flex" style={{ color: 'var(--muted)' }}>
+              <div className="ctv-mono hidden items-center gap-2 text-[9px] tracking-[.16em] lg:flex" style={{ color: 'var(--muted)' }}>
                 <span>ONE PULL REQUEST</span>
                 <span style={{ color: 'var(--rule)' }}>→</span>
                 <span>AST</span>
@@ -2545,7 +2526,7 @@ export function Hero() {
                 <button
                   type="button"
                   onClick={restart}
-                  className="ctv-mono flex items-center gap-1 border px-1.5 py-1 text-[7px] tracking-[.12em] transition-colors hover:border-[var(--ink)]"
+                  className="ctv-mono flex items-center gap-1 border px-1.5 py-1 text-[8.5px] tracking-[.12em] transition-colors hover:border-[var(--ink)]"
                   style={{ borderColor: 'var(--rule)', color: 'var(--muted)' }}
                   aria-label="Start over from chapter 1"
                   title="Start over from chapter 1"
@@ -2553,7 +2534,7 @@ export function Hero() {
                   <ArrowCounterClockwise size={10} weight="bold" />
                   <span className="hidden sm:inline">START OVER</span>
                 </button>
-                <div className="ctv-mono flex items-center gap-1.5 text-[8px] tracking-[.16em] sm:text-[9px]">
+                <div className="ctv-mono flex items-center gap-1.5 text-[9px] tracking-[.16em] sm:text-[10px]">
                   <span style={{ color: 'var(--accent)' }}>{chapter.id}</span>
                   <span style={{ color: 'var(--muted)' }}>/ 08</span>
                 </div>
@@ -2601,16 +2582,16 @@ export function Hero() {
                   className="absolute inset-x-0 top-0 z-30 flex h-8 items-center justify-between gap-2 border-b px-2.5 sm:h-9 sm:px-3 lg:px-8"
                   style={{ borderColor: 'var(--rule)', background: 'var(--panel)' }}
                 >
-                  <span className="ctv-mono truncate text-[7.5px] tracking-[.16em] sm:text-[9px]" style={{ color: 'var(--ink-2)' }}>
+                  <span className="ctv-mono truncate text-[8.5px] tracking-[.16em] sm:text-[10px]" style={{ color: 'var(--ink-2)' }}>
                     FIG. {chapter.id} <span style={{ color: 'var(--muted)' }}>/ {chapter.tag}</span>
                   </span>
-                  <span className="ctv-mono hidden shrink-0 text-[7.5px] tracking-[.18em] sm:block" style={{ color: 'var(--muted)' }}>
+                  <span className="ctv-mono hidden shrink-0 text-[8.5px] tracking-[.18em] sm:block" style={{ color: 'var(--muted)' }}>
                     LIVE TRACE · SCI v2
                   </span>
                   <button
                     type="button"
                     onClick={toggleEngine}
-                    className="ctv-mono shrink-0 border px-1.5 py-0.5 text-[7px] tracking-[.1em] transition-colors"
+                    className="ctv-mono shrink-0 border px-1.5 py-0.5 text-[8.5px] tracking-[.1em] transition-colors"
                     style={{
                       borderColor: engineExpanded ? 'var(--accent)' : 'var(--rule)',
                       color: engineExpanded ? 'var(--accent)' : 'var(--muted)',
@@ -2692,36 +2673,21 @@ export function Hero() {
                 <div className="ctv-corner br" />
 
                 <div
-                  className="pointer-events-none absolute left-2 top-10 z-30 flex items-center gap-2 border px-2 py-1.5 sm:left-3 sm:top-12 lg:left-8"
-                  style={{ borderColor: 'var(--rule-soft)', background: 'var(--panel)' }}
-                >
-                  <span ref={auditDotRef} className="inline-block h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--green)' }} />
-                  <div>
-                    <div ref={auditRef} className="ctv-mono text-[7.5px] tracking-[.14em] sm:text-[8px]" style={{ color: 'var(--ink)' }}>
-                      AUDIT PASS
-                    </div>
-                    <div ref={auditMetaRef} className="ctv-mono mt-0.5 text-[6.5px] tracking-[.04em] sm:text-[7px]" style={{ color: 'var(--muted)' }}>
-                      {totalLinks} LINKS · 0 CLASH
-                    </div>
-                  </div>
-                </div>
-
-                <div
                   className="pointer-events-none absolute right-2 top-10 z-30 max-w-[58%] border px-2 py-1.5 text-right sm:right-3 sm:top-12 sm:max-w-[46%] sm:px-2.5 sm:py-2 lg:right-8"
                   style={{ borderColor: 'var(--rule-soft)', background: 'var(--panel)' }}
                 >
-                  <div className="ctv-mono truncate text-[7px] uppercase tracking-[.16em] sm:text-[8px]" style={{ color: 'var(--muted)' }}>
+                  <div className="ctv-mono truncate text-[8.5px] uppercase tracking-[.16em] sm:text-[9px]" style={{ color: 'var(--muted)' }}>
                     {chapter.metric.label}
                   </div>
                   <div className="mt-0.5 flex items-baseline justify-end gap-1">
                     <span ref={counterRef} className="ctv-num text-[24px] leading-none sm:text-[31px]" style={{ color: 'var(--ink)' }}>
                       0
                     </span>
-                    <span className="ctv-mono text-[8px] leading-tight sm:text-[9.5px]" style={{ color: 'var(--muted)' }}>
+                    <span className="ctv-mono text-[8.5px] leading-tight sm:text-[10px]" style={{ color: 'var(--muted)' }}>
                       {chapter.metric.unit}
                     </span>
                   </div>
-                  <div className="ctv-mono mt-0.5 truncate text-[6.5px] tracking-[.05em] sm:text-[7.5px]" style={{ color: 'var(--muted)' }}>
+                  <div className="ctv-mono mt-0.5 truncate text-[8px] tracking-[.05em] sm:text-[9px]" style={{ color: 'var(--muted)' }}>
                     {chapter.metric.sub}
                   </div>
                 </div>
@@ -2748,23 +2714,23 @@ export function Hero() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex min-w-0 items-baseline gap-1.5">
-                      <span className="ctv-mono shrink-0 text-[7px] tracking-[.18em]" style={{ color: 'var(--muted)' }}>SCI</span>
-                      <span className="ctv-mono truncate text-[8.5px] tracking-[.01em] sm:text-[10px]" style={{ color: 'var(--ink-2)' }}>
+                      <span className="ctv-mono shrink-0 text-[8.5px] tracking-[.18em]" style={{ color: 'var(--muted)' }}>SCI</span>
+                      <span className="ctv-mono truncate text-[9px] tracking-[.01em] sm:text-[11px]" style={{ color: 'var(--ink-2)' }}>
                         = ((E × I) + M) / R
                       </span>
                     </div>
-                    <span className="ctv-mono shrink-0 text-[8px] sm:text-[9.5px]" style={{ color: 'var(--accent)' }}>
+                    <span className="ctv-mono shrink-0 text-[9px] sm:text-[10.5px]" style={{ color: 'var(--accent)' }}>
                       {fmtSci(sciValue)} <span style={{ color: 'var(--muted)' }}>{sci.unit}</span>
                     </span>
                   </div>
                   <div className="mt-0.5 flex items-center justify-between gap-2">
-                    <div className="ctv-mono flex flex-wrap gap-x-2 text-[6.5px] sm:text-[7.5px]" style={{ color: 'var(--muted)' }}>
+                    <div className="ctv-mono flex flex-wrap gap-x-2 text-[8px] sm:text-[9px]" style={{ color: 'var(--muted)' }}>
                       <span>E {fmtTerm(sci.E)} kWh</span>
                       <span>I {sci.I}{sci.I2 ? ` / ${sci.I2}` : ''} g/kWh</span>
                       <span>M {fmtTerm(sci.M)} g</span>
                       <span>R {fmtTerm(sci.R)}</span>
                     </div>
-                    <span className="ctv-mono hidden truncate text-[7px] lg:block" style={{ color: 'var(--muted)' }}>
+                    <span className="ctv-mono hidden truncate text-[8.5px] lg:block" style={{ color: 'var(--muted)' }}>
                       {sci.scope}
                     </span>
                   </div>
@@ -2781,7 +2747,7 @@ export function Hero() {
                       aria-label={`Chapter ${s.id}: ${s.tag}`}
                       aria-current={i === active ? 'step' : undefined}
                     >
-                      <span className="ctv-mono text-[8px] tracking-[.08em]">{s.id}</span>
+                      <span className="ctv-mono text-[9px] tracking-[.08em]">{s.id}</span>
                       <span className="rail-rule" />
                     </button>
                   ))}
